@@ -68,8 +68,8 @@ class ContextDialog(
                 }
                 animateView()
                 enableDisableView(true)
-                contextDialogCallBack.returned(selectedItem, selectedPosition)
             }
+            contextDialogCallBack.returned(selectedItem, selectedPosition)
         }
     }
 
