@@ -93,9 +93,10 @@ class ContextDialog(
                         ViewGroup.LayoutParams.WRAP_CONTENT
                 )
         )
-        view.setOnLongClickListener {
-            return@setOnLongClickListener false
-        }
+        if (viewGroup is RecyclerView)
+            view.setOnLongClickListener {
+                return@setOnLongClickListener false
+            }
         animateView()
     }
 
