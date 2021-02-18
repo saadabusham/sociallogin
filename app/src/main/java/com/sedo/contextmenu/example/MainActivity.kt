@@ -1,6 +1,5 @@
 package com.sedo.contextmenu.example
 
-import android.media.Image
 import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -11,9 +10,29 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val relativeContainer : LinearLayout = findViewById(R.id.relativeContainer)
-        val btn : ImageView = findViewById(R.id.btn)
-        btn.setOnClickListener {
+        val relativeContainer : RelativeLayout = findViewById(R.id.relativeContainer)
+        val imgClose : ImageView = findViewById(R.id.imgClose)
+        val imgEdit : ImageView = findViewById(R.id.imgEdit)
+        val imgRemove : ImageView = findViewById(R.id.imgRemove)
+        imgClose.setOnClickListener {
+            ContextDialog(this,relativeContainer,it,getMenuItems(),object : ContextDialog.ContextDialogCallBack{
+                override fun returned(item: Menu?, position: Int) {
+                    item?.let { it ->
+                        Toast.makeText(this@MainActivity,it.title,Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }).show()
+        }
+        imgEdit.setOnClickListener {
+            ContextDialog(this,relativeContainer,it,getMenuItems(),object : ContextDialog.ContextDialogCallBack{
+                override fun returned(item: Menu?, position: Int) {
+                    item?.let { it ->
+                        Toast.makeText(this@MainActivity,it.title,Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }).show()
+        }
+        imgRemove.setOnClickListener {
             ContextDialog(this,relativeContainer,it,getMenuItems(),object : ContextDialog.ContextDialogCallBack{
                 override fun returned(item: Menu?, position: Int) {
                     item?.let { it ->

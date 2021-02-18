@@ -1,17 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     android:id="@+id/relativeContainer"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center">
+    android:gravity="center"
+    android:orientation="vertical">
 
     <ImageView
-        android:id="@+id/btn"
+        android:id="@+id/imgClose"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:src="@drawable/ic_menu_cancel"
-        android:layout_centerInParent="true"/>
+        android:layout_marginRight="50dp"/>
 
-</LinearLayout>
+    <ImageView
+        android:id="@+id/imgEdit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_menu_edit"
+        android:layout_centerInParent="true"
+        android:layout_below="@id/imgClose"/>
+    <ImageView
+        android:id="@+id/imgRemove"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_menu_remove"
+        android:layout_below="@id/imgEdit"
+        android:layout_marginLeft="100dp"/>
+
+</RelativeLayout>
