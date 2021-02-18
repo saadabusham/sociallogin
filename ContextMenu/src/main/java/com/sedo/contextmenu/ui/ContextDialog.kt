@@ -30,6 +30,7 @@ class ContextDialog(
     Dialog(mContext, R.style.FullScreenTransparentDialog) {
 
     var selectedPosition = 0
+    var selectedItem: Menu? = null
     private lateinit var dialogContextMenuBinding: DialogContextMenuBinding
     lateinit var contextMenuRecyclerAdapter: ContextMenuRecyclerAdapter
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,7 +59,7 @@ class ContextDialog(
                 animateView()
             }
             enableDisableView(true)
-            contextDialogCallBack.returned(selectedPosition)
+            contextDialogCallBack.returned(selectedItem, selectedPosition)
         }
     }
 
@@ -109,6 +110,7 @@ class ContextDialog(
         dialogContextMenuBinding?.recyclerView?.setOnItemClickListener(object :
             BaseBindingRecyclerViewAdapter.OnItemClickListener {
             override fun onItemClick(view1: View?, position: Int, item: Any) {
+                selectedItem = item as Menu
                 selectedPosition = position
                 dismiss()
             }
@@ -123,7 +125,7 @@ class ContextDialog(
     }
 
     interface ContextDialogCallBack {
-        fun returned(position: Int)
+        fun returned(item: Menu?, position: Int)
     }
 
 }
