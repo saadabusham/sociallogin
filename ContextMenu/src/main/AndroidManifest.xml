@@ -2,4 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.sedo.contextmenu">
 
+    <application
+        android:allowBackup="false"
+        android:supportsRtl="true"/>
 </manifest>

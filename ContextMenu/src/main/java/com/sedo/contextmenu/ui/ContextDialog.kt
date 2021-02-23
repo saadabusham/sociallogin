@@ -87,11 +87,7 @@ class ContextDialog(
         val insertPoint = dialogContextMenuBinding?.viewContainer as ViewGroup
         insertPoint.addView(
                 view,
-                0,
-                ViewGroup.LayoutParams(
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT
-                )
+                0
         )
         if (viewGroup is RecyclerView)
             view.setOnLongClickListener {

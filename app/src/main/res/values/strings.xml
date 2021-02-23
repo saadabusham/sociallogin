@@ -2,7 +2,8 @@
     <string name="app_name">Context Menu</string>
     <!--    Context Menu    -->
     <string name="menu_close">Close</string>
-    <string name="menu_edit">Edit</string>
+    <string name="menu_view">View</string>
     <string name="menu_remove_item">Remove item</string>
     <string name="menu_clear_all">Clear all</string>
+    <string name="menu_reload">Reload</string>
 </resources>

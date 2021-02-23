@@ -33,7 +33,6 @@
             ivSetSrcImageFromResources="@{data.icon}"
             android:layout_width="@dimen/_18sdp"
             android:layout_height="@dimen/_18sdp"
-            tools:src="@drawable/ic_menu_cancel"
             android:layout_marginEnd="@dimen/_10sdp"
             android:layout_marginTop="@dimen/_15sdp"
             android:layout_marginBottom="@dimen/_15sdp" />

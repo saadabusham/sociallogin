@@ -49,6 +49,10 @@ abstract class BaseBindingRecyclerViewAdapter<MODEL>(
         items.remove(newItem)
         notifyDataSetChanged()
     }
+    fun removeAt(position: Int){
+        items.removeAt(position)
+        notifyItemRemoved(position)
+    }
 
     override fun getItemCount(): Int = items.size
 
