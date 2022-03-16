@@ -3,6 +3,7 @@ package com.sedo.contextmenu.ui
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -75,7 +76,7 @@ class ContextDialog(
                 }
                 contextDialogCallBack.returned(selectedItem, selectedPosition)
             } catch (e: Exception) {
-
+                Log.d("Context Menu", e.localizedMessage)
             }
         }
     }
@@ -103,7 +104,7 @@ class ContextDialog(
                 }
             animateView()
         } catch (e: Exception) {
-
+            Log.d("Context Menu", e.localizedMessage)
         }
     }
 
