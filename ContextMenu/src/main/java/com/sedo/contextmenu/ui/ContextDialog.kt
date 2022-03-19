@@ -48,8 +48,11 @@ class ContextDialog private constructor(
 
     init {
         with(builder) {
-            viewGroup = getViewGroup()
             view = getView()
+            view?.parent?.let {
+                it as ViewGroup
+                viewGroup = it
+            }
             items = getItems()
             callBack = getCallBack()
             customViewResId = getCustomViewResId()
@@ -251,25 +254,16 @@ class ContextDialog private constructor(
     }
 
     interface ContextDialogCallBack {
-        fun returned(item: Menu?, position: Int){}
-        fun rootViewClicked(view: View){}
+        fun returned(item: Menu?, position: Int) {}
+        fun rootViewClicked(view: View) {}
     }
 
     class Builder(val context: Context) {
-        private var viewGroup: ViewGroup? = null
         private var view: View? = null
         private var items: MutableList<Menu> = mutableListOf()
         private var callBack: ContextDialogCallBack? = null
         private var customViewResId: Int? = null
         private var customData: CustomData? = null
-        fun setViewGroup(viewGroup: ViewGroup): Builder {
-            this.viewGroup = viewGroup
-            return this
-        }
-
-        fun getViewGroup(): ViewGroup? {
-            return viewGroup
-        }
 
         fun setView(view: View): Builder {
             this.view = view

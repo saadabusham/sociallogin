@@ -13,7 +13,6 @@ class PreviewActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_preview)
-        val relativeContainer: RelativeLayout = findViewById(R.id.relativeContainer)
         val imgSample: ImageView = findViewById(R.id.imgSample)
         val toolbar: MaterialToolbar = findViewById(R.id.toolbar)
         intent.getIntExtra("imageRes", R.drawable.sample_image).let {image->
