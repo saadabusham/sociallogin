@@ -3,7 +3,13 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/TechZone Work/ContextMenu/ContextMenu/src/main/res/layout/dialog_context_menu.xml" value="0.1921875" />
+        <entry key="..\:/TechZone Work/ContextMenu/ContextMenu/src/main/res/layout/layout_custom_view.xml" value="0.25" />
+        <entry key="..\:/TechZone Work/ContextMenu/ContextMenu/src/main/res/layout/row_context_item.xml" value="0.1921875" />
         <entry key="..\:/TechZone Work/ContextMenu/app/src/main/res/drawable/ic_menu_cancel.xml" value="0.20833333333333334" />
+        <entry key="..\:/TechZone Work/ContextMenu/app/src/main/res/layout/activity_preview.xml" value="0.1921875" />
+        <entry key="..\:/TechZone Work/ContextMenu/app/src/main/res/layout/activity_recycleer.xml" value="0.1921875" />
+        <entry key="..\:/TechZone Work/ContextMenu/app/src/main/res/layout/layout_custom_view1.xml" value="0.1921875" />
         <entry key="..\:/TechZone Work/ContextMenu/app/src/main/res/layout/row_sample_item.xml" value="0.12635869565217392" />
       </map>
     </option>

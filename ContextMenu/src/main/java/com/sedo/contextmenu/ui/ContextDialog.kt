@@ -10,36 +10,62 @@ import android.view.ViewGroup
 import android.view.Window
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
+import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.sedo.contextmenu.R
+import com.sedo.contextmenu.data.models.CustomData
 import com.sedo.contextmenu.data.models.Menu
 import com.sedo.contextmenu.databinding.DialogContextMenuBinding
 import com.sedo.contextmenu.ui.adapters.ContextMenuRecyclerAdapter
 import com.sedo.contextmenu.ui.base.BaseBindingRecyclerViewAdapter
 import com.sedo.contextmenu.utils.*
+import com.sedo.contextmenu.utils.binidngadapters.loadImage
 import com.sedo.contextmenu.utils.extensions.setOnItemClickListener
 
 
-class ContextDialog(
-    mContext: Context,
-    private val viewGroup: ViewGroup,
-    private val view: View,
-    private val items: List<Menu>,
-    private val contextDialogCallBack: ContextDialogCallBack
-) : Dialog(mContext, R.style.FullScreenTransparentDialog) {
+class ContextDialog private constructor(
+    private val builder: Builder
+) : Dialog(builder.context, R.style.FullScreenTransparentDialog) {
 
-    var selectedPosition = 0
-    var viewIndex = 0
-    var selectedItem: Menu? = null
-    var layoutParams: RelativeLayout.LayoutParams? = null
+    private var selectedPosition = 0
+    private var viewIndex = 0
+    private var selectedItem: Menu? = null
+    private var layoutParams: RelativeLayout.LayoutParams? = null
     private lateinit var dialogContextMenuBinding: DialogContextMenuBinding
-    lateinit var contextMenuRecyclerAdapter: ContextMenuRecyclerAdapter
+    private lateinit var contextMenuRecyclerAdapter: ContextMenuRecyclerAdapter
+
+    private var viewGroup: ViewGroup? = null
+    private var view: View? = null
+    private var items: MutableList<Menu> = mutableListOf()
+    private var callBack: ContextDialogCallBack? = null
+    private var customViewResId: Int? = null
+    private var customData: CustomData? = null
+
+    init {
+        with(builder) {
+            viewGroup = getViewGroup()
+            view = getView()
+            items = getItems()
+            callBack = getCallBack()
+            customViewResId = getCustomViewResId()
+            customData = getCustomData()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
+        setUpBindingView()
+        setUpBinding()
+        setUpViews()
+    }
+
+    private fun setUpBindingView() {
         dialogContextMenuBinding =
             DataBindingUtil.inflate(
                 LayoutInflater.from(context),
@@ -47,12 +73,86 @@ class ContextDialog(
                 null,
                 false
             )
-        setUpView()
         setContentView(dialogContextMenuBinding.root)
         setCancelable(true)
         setUpBinding()
         setUpListeners()
+        setUpListeners()
         setUpMenuRecyclerView()
+    }
+
+    private fun setUpBinding() {
+        dialogContextMenuBinding.viewModel = this
+    }
+
+    private fun isCustomView(): Boolean {
+        return (customData != null)
+    }
+
+    private fun setUpViews() {
+        if (isCustomView()) {
+            setUpCustomView()
+        } else {
+            removeFromGroupView()
+        }
+    }
+
+    private fun setUpCustomView() {
+        view = LayoutInflater.from(context)
+            .inflate(customViewResId ?: R.layout.layout_custom_view, null, false)
+        view?.findViewById<ImageView>(R.id.imgPhoto)?.apply {
+            customData?.image?.let {
+                loadImage(image = it)
+            } ?: also {
+                gone()
+            }
+        }
+        view?.findViewById<TextView>(R.id.tvTitle)?.apply {
+            customData?.title?.let {
+                text = it
+            } ?: also {
+                gone()
+            }
+            customData?.titleColor?.let {
+                context.resources.getColor(it).let {
+                    setTextColor(it)
+                }
+            }
+        }
+        view?.findViewById<TextView>(R.id.tvSubTitle)?.apply {
+            customData?.subtitle?.let {
+                text = it
+            } ?: also {
+                gone()
+            }
+            customData?.subtitleColor?.let {
+                context.resources.getColor(it).let {
+                    setTextColor(it)
+                }
+            }
+        }
+        view?.findViewById<TextView>(R.id.tvDate)?.apply {
+            customData?.date?.let {
+                text = it
+            } ?: also {
+                gone()
+            }
+            customData?.dateColor?.let {
+                context.resources.getColor(it).let {
+                    setTextColor(it)
+                }
+            }
+        }
+        customData?.backgroundColor?.let {
+            context.resources.getColor(it).let {
+                view?.findViewById<CardView>(R.id.cvRoot)?.setCardBackgroundColor(it)
+            }
+        }
+        view?.layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.MATCH_PARENT
+        )
+        addView()
     }
 
     private fun setUpListeners() {
@@ -62,44 +162,43 @@ class ContextDialog(
                 if (viewGroup !is RecyclerView) {
                     when (viewGroup) {
                         is LinearLayout -> {
-                            viewGroup.addView(view, viewIndex)
+                            viewGroup?.addView(view, viewIndex)
                         }
                         is RelativeLayout -> {
-                            viewGroup.addView(view, layoutParams)
+                            viewGroup?.addView(view, layoutParams)
                         }
                         else -> {
-                            viewGroup.addView(view)
+                            viewGroup?.addView(view)
                         }
                     }
                     animateView()
-                    enableDisableView(true)
+                    enableDisablePopView(true)
                 }
-                contextDialogCallBack.returned(selectedItem, selectedPosition)
+                callBack?.returned(selectedItem, selectedPosition)
             } catch (e: Exception) {
                 Log.d("Context Menu", e.localizedMessage)
             }
         }
     }
 
-    private fun setUpBinding() {
-        dialogContextMenuBinding.viewModel = this
+    private fun animateView() {
+        val animation: Animation = AnimationUtils.loadAnimation(context, R.anim.fade_in)
+        animation.startOffset = 50.toLong()
+        view?.startAnimation(animation)
     }
 
-    private fun setUpView() {
+
+    private fun removeFromGroupView() {
         try {
             if (viewGroup is LinearLayout)
-                viewIndex = viewGroup.indexOfChild(view)
+                viewIndex = viewGroup?.indexOfChild(view) ?: 0
             else if (viewGroup is RelativeLayout)
-                layoutParams = view.layoutParams as RelativeLayout.LayoutParams
-            viewGroup.removeView(view)
-            enableDisableView(false)
-            val insertPoint = dialogContextMenuBinding.viewContainer as ViewGroup
-            insertPoint.addView(
-                view,
-                0
-            )
+                layoutParams = view?.layoutParams as RelativeLayout.LayoutParams
+            viewGroup?.removeView(view)
+            enableDisablePopView(false)
+            addView()
             if (viewGroup is RecyclerView)
-                view.setOnLongClickListener {
+                view?.setOnLongClickListener {
                     return@setOnLongClickListener false
                 }
             animateView()
@@ -108,23 +207,25 @@ class ContextDialog(
         }
     }
 
-    private fun animateView() {
-        val animation: Animation = AnimationUtils.loadAnimation(context, R.anim.fade_in)
-        animation.startOffset = 50.toLong()
-        view.startAnimation(animation)
+    private fun addView() {
+        val insertPoint = dialogContextMenuBinding.viewContainer as ViewGroup
+        insertPoint.addView(
+            view,
+            0
+        )
     }
 
-    private fun enableDisableView(enable: Boolean) {
+    private fun enableDisablePopView(enable: Boolean) {
         if (view is ViewGroup)
             if (enable)
-                view.enableViews()
+                view?.enableViews()
             else
-                view.disableViews()
+                view?.disableViews()
         else
             if (enable)
-                view.enableView()
+                view?.enableView()
             else
-                view.disableView()
+                view?.disableView()
     }
 
     private fun setUpMenuRecyclerView() {
@@ -149,6 +250,72 @@ class ContextDialog(
 
     interface ContextDialogCallBack {
         fun returned(item: Menu?, position: Int)
+    }
+
+    class Builder(val context: Context) {
+        private var viewGroup: ViewGroup? = null
+        private var view: View? = null
+        private var items: MutableList<Menu> = mutableListOf()
+        private var callBack: ContextDialogCallBack? = null
+        private var customViewResId: Int? = null
+        private var customData: CustomData? = null
+        fun setViewGroup(viewGroup: ViewGroup): Builder {
+            this.viewGroup = viewGroup
+            return this
+        }
+
+        fun getViewGroup(): ViewGroup? {
+            return viewGroup
+        }
+
+        fun setView(view: View): Builder {
+            this.view = view
+            return this
+        }
+
+        fun getView(): View? {
+            return view
+        }
+
+        fun setItems(items: MutableList<Menu>): Builder {
+            this.items = items
+            return this
+        }
+
+        fun getItems(): MutableList<Menu> {
+            return items
+        }
+
+        fun setCallBack(callBack: ContextDialogCallBack): Builder {
+            this.callBack = callBack
+            return this
+        }
+
+        fun getCallBack(): ContextDialogCallBack? {
+            return callBack
+        }
+
+        fun setCustomResId(customViewResId: Int?): Builder {
+            this.customViewResId = customViewResId
+            return this
+        }
+
+        fun getCustomViewResId(): Int? {
+            return customViewResId
+        }
+
+        fun setCustomData(customData: CustomData?): Builder {
+            this.customData = customData
+            return this
+        }
+
+        fun getCustomData(): CustomData? {
+            return customData
+        }
+
+        fun build(): ContextDialog {
+            return ContextDialog(this)
+        }
     }
 
 }

@@ -33,10 +33,13 @@ class SampleRecyclerAdapter constructor(
         BaseViewHolder<Int>(binding.root) {
 
         override fun bind(item: Int) {
-            binding?.imgSample.setImageResource(item)
+            binding.imgSample.setImageResource(item)
             binding.root.setOnLongClickListener {
                 itemClickListener?.onItemLongClick(it, adapterPosition, item)
                 return@setOnLongClickListener true
+            }
+            binding.root.setOnClickListener {
+                itemClickListener?.onItemClick(it, adapterPosition, item)
             }
         }
     }
