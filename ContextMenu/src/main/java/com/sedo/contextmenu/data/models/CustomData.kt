@@ -8,5 +8,6 @@ data class CustomData(
     val subtitleColor: Int? = null,
     val date: String? = null,
     val dateColor: Int? = null,
-    val backgroundColor: Int? = null
+    val backgroundColor: Int? = null,
+    val cornerRadius: Float? = null
 )

@@ -45,6 +45,7 @@ class ContextDialog private constructor(
     private var callBack: ContextDialogCallBack? = null
     private var customViewResId: Int? = null
     private var customData: CustomData? = null
+    private var fillWidth: Boolean? = null
 
     init {
         with(builder) {
@@ -57,6 +58,7 @@ class ContextDialog private constructor(
             callBack = getCallBack()
             customViewResId = getCustomViewResId()
             customData = getCustomData()
+            fillWidth = getFillWidth()
         }
     }
 
@@ -145,11 +147,23 @@ class ContextDialog private constructor(
                 }
             }
         }
-        customData?.backgroundColor?.let {
-            context.resources.getColor(it).let {
-                view?.findViewById<CardView>(R.id.cvRoot)?.setCardBackgroundColor(it)
+        view?.findViewById<CardView>(R.id.cvRoot)?.let { cvRoot ->
+            customData?.backgroundColor?.let {
+                context.resources.getColor(it).let {
+                    cvRoot.setCardBackgroundColor(it)
+                }
+            }
+            customData?.cornerRadius?.let {
+                cvRoot.radius = it
             }
         }
+
+        dialogContextMenuBinding.cvContent?.let { cvContent ->
+            builder.getCornerRadius()?.let {
+                cvContent.radius = it
+            }
+        }
+
         view?.layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.MATCH_PARENT
@@ -214,9 +228,17 @@ class ContextDialog private constructor(
 
     private fun addView() {
         val insertPoint = dialogContextMenuBinding.viewContainer as ViewGroup
+        var params = view?.layoutParams
+        if (fillWidth != null && fillWidth == true) {
+            params = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
+            )
+        }
         insertPoint.addView(
             view,
-            0
+            0,
+            params
         )
     }
 
@@ -264,6 +286,8 @@ class ContextDialog private constructor(
         private var callBack: ContextDialogCallBack? = null
         private var customViewResId: Int? = null
         private var customData: CustomData? = null
+        private var cornerRadius: Float? = null
+        private var fillWidth: Boolean? = null
 
         fun setView(view: View): Builder {
             this.view = view
@@ -308,6 +332,24 @@ class ContextDialog private constructor(
 
         fun getCustomData(): CustomData? {
             return customData
+        }
+
+        fun setCornerRadius(cornerRadius: Float?): Builder {
+            this.cornerRadius = cornerRadius
+            return this
+        }
+
+        fun getCornerRadius(): Float? {
+            return cornerRadius
+        }
+
+        fun setFillWidth(fillWidth: Boolean?): Builder {
+            this.fillWidth = fillWidth
+            return this
+        }
+
+        fun getFillWidth(): Boolean? {
+            return fillWidth
         }
 
         fun build(): ContextDialog {

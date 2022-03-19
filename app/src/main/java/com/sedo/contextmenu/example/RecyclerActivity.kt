@@ -42,6 +42,7 @@ class RecyclerActivity : AppCompatActivity() {
                 view?.let {
                     ContextDialog.Builder(this@RecyclerActivity)
                         .setItems(getMenuItems())
+                        .setFillWidth(true)
                         .setCustomData(
                             CustomData(
                                 image = image,
@@ -49,8 +50,10 @@ class RecyclerActivity : AppCompatActivity() {
                                 date = "19/3/2022",
                                 subtitle = "No SubTitle",
                                 backgroundColor = R.color.white,
+                                cornerRadius = resources.getDimension(R.dimen._10sdp)
                             )
                         )
+                        .setCornerRadius(resources.getDimension(R.dimen._10sdp))
                         .setCustomResId(R.layout.layout_custom_view_sample)
                         .setCallBack(object : ContextDialog.ContextDialogCallBack {
                             override fun returned(item: Menu?, position: Int) {

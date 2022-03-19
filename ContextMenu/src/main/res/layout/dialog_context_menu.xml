@@ -32,6 +32,7 @@
                 android:paddingBottom="@dimen/_10sdp" />
 
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cvContent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/_15sdp"
@@ -39,7 +40,7 @@
                 android:layout_marginEnd="@dimen/_15sdp"
                 android:layout_marginBottom="@dimen/_15sdp"
                 android:layout_gravity="center"
-                app:cardCornerRadius="@dimen/_15sdp"
+                app:cardCornerRadius="0dp"
                 android:layout_marginLeft="@dimen/_15sdp"
                 android:layout_marginRight="@dimen/_50sdp">
 
