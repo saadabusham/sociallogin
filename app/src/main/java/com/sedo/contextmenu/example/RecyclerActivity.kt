@@ -33,7 +33,8 @@ class RecyclerActivity : AppCompatActivity() {
                     Intent(
                         this@RecyclerActivity,
                         PreviewActivity::class.java
-                    ).putExtra("imageRes", item as Int)
+                    )
+                        .putExtra("imageRes", item as Int)
                 )
             }
 
@@ -73,6 +74,17 @@ class RecyclerActivity : AppCompatActivity() {
                                         fillSampleData()
                                     }
                                 }
+                            }
+
+                            override fun rootViewClicked(view: View) {
+                                super.rootViewClicked(view)
+                                startActivity(
+                                    Intent(
+                                        this@RecyclerActivity,
+                                        PreviewActivity::class.java
+                                    )
+                                        .putExtra("imageRes", image as Int)
+                                )
                             }
                         })
                         .build().show()

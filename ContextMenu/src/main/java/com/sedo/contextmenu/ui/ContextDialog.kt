@@ -63,6 +63,7 @@ class ContextDialog private constructor(
         setUpBindingView()
         setUpBinding()
         setUpViews()
+        setUpListeners()
     }
 
     private fun setUpBindingView() {
@@ -76,8 +77,6 @@ class ContextDialog private constructor(
         setContentView(dialogContextMenuBinding.root)
         setCancelable(true)
         setUpBinding()
-        setUpListeners()
-        setUpListeners()
         setUpMenuRecyclerView()
     }
 
@@ -179,6 +178,9 @@ class ContextDialog private constructor(
                 Log.d("Context Menu", e.localizedMessage)
             }
         }
+        view?.setOnClickListener {
+            callBack?.rootViewClicked(it)
+        }
     }
 
     private fun animateView() {
@@ -249,7 +251,8 @@ class ContextDialog private constructor(
     }
 
     interface ContextDialogCallBack {
-        fun returned(item: Menu?, position: Int)
+        fun returned(item: Menu?, position: Int){}
+        fun rootViewClicked(view: View){}
     }
 
     class Builder(val context: Context) {
