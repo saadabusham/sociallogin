@@ -94,6 +94,12 @@ class ContextDialog private constructor(
     }
 
     private fun setUpViews() {
+        dialogContextMenuBinding.cvContent?.let { cvContent ->
+            builder.getCornerRadius()?.let {
+                cvContent.radius = it
+            }
+        }
+
         if (isCustomView()) {
             setUpCustomView()
         } else {
@@ -158,16 +164,6 @@ class ContextDialog private constructor(
             }
         }
 
-        dialogContextMenuBinding.cvContent?.let { cvContent ->
-            builder.getCornerRadius()?.let {
-                cvContent.radius = it
-            }
-        }
-
-        view?.layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.MATCH_PARENT
-        )
         addView()
     }
 
