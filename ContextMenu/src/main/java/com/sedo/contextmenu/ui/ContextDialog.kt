@@ -52,6 +52,8 @@ class ContextDialog private constructor(
     private var height: Int? = null
     private var width: Int? = null
     private var blur: Float? = null
+    private var blurColor: Int? = null
+    private var blurHexColor: String? = null
     private var backgroundColor: Int? = null
 
     init {
@@ -69,6 +71,8 @@ class ContextDialog private constructor(
             width = getWidth()
             height = getHeight()
             blur = getBlur()
+            blurColor = getBlurColor()
+            blurHexColor = getBlurHexColor()
             backgroundColor = getBackgroundColor()
             cornerRadius = getCornerRadius()
         }
@@ -225,27 +229,13 @@ class ContextDialog private constructor(
         }
     }
     private fun setBackgroundBlur() {
-        // First get bitmap with blur filter applied, using the function blur presented here,
-        // or another function.
-        // Activity parameter is the Activity for which you call dialog.show();
-
-        val bitmap: Bitmap? = context.blur(blur)
-
-        // Get bitmap height.
+        val bitmap: Bitmap? = context.blur(blur,colorHex = blurHexColor,color = blurColor)
         bitmap?.let {
             val bitmapHeight = bitmap.height
             setOnShowListener { dialogInterface ->
-                // When dialog is shown, before set new blurred image for background drawable,
-                // the root view height and dialog margin are saved.
                 val rootViewHeight: Int = binding.root.height ?: 0
                 val marginLeftAndRight: Int = window?.decorView?.paddingLeft ?: 0
-
-                // Set new blurred image for background drawable.
                 window?.setBackgroundDrawable(BitmapDrawable(context.resources, bitmap))
-
-                // After get positions and heights, recover and rebuild original marginTop position,
-                // that is (bitmapHeight - rootViewHeight) / 2.
-                // Also recover and rebuild Dialog original left and right margin.
                 val rootViewLayoutParams = binding.root.layoutParams as FrameLayout.LayoutParams
                 rootViewLayoutParams.setMargins(
                     marginLeftAndRight,
@@ -354,6 +344,8 @@ class ContextDialog private constructor(
         private var height: Int? = null
         private var width: Int? = null
         private var blur: Float? = null
+        private var blurColor: Int? = null
+        private var blurHexColor: String? = null
         private var backgroundColor: Int? = null
 
         fun setView(view: View): Builder {
@@ -453,6 +445,24 @@ class ContextDialog private constructor(
 
         fun getBlur(): Float? {
             return blur
+        }
+
+        fun setBlurColor(blurColor: Int?): Builder {
+            this.blurColor = blurColor
+            return this
+        }
+
+        fun getBlurColor(): Int? {
+            return blurColor
+        }
+
+        fun setBlurHexColor(blurHexColor: String?): Builder {
+            this.blurHexColor = blurHexColor
+            return this
+        }
+
+        fun getBlurHexColor(): String? {
+            return blurHexColor
         }
 
         fun build(): ContextDialog {

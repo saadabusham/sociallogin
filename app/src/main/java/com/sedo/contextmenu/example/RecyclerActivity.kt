@@ -44,6 +44,7 @@ class RecyclerActivity : AppCompatActivity() {
                         .setItems(getMenuItems())
                         .setFillWidth(true)
                         .setBlur(20f)
+//                        .setBlurHexColor("#BF000000")
 //                        .setCustomData(
 //                            CustomData(
 //                                image = image,

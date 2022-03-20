@@ -3,6 +3,7 @@ package com.sedo.contextmenu.utils.extensions
 import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.Point
 import android.graphics.Rect
 import android.os.Build
@@ -13,6 +14,8 @@ import android.renderscript.ScriptIntrinsicBlur
 import android.util.DisplayMetrics
 import android.view.View
 import android.view.WindowManager
+import com.sedo.contextmenu.utils.BlurMaker
+import com.sedo.contextmenu.utils.BlurFactor
 
 
 fun Activity.blur(blur: Float? = null): Bitmap? {
@@ -37,6 +40,25 @@ fun Activity.blur(blur: Float? = null): Bitmap? {
     return bitmap
 }
 
+fun Activity.blur(blur: Float? = null, colorHex: String? = null, color: Int? = null): Bitmap? {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1 || blur == null || (blur <= 0f || blur > 25f)) {
+        return null
+    }
+    val bitmap: Bitmap? = this.takeScreenShot()
+    val widthHeight: IntArray = getScreenSize(this)
+    return BlurMaker.of(
+        this,
+        bitmap,
+        BlurFactor(
+            radius = blur.toInt(),
+            colorHex = colorHex,
+            color = color ?: Color.TRANSPARENT,
+            width = widthHeight[WIDTH_INDEX],
+            height = widthHeight[HEIGHT_INDEX]
+        )
+    )
+}
+
 fun Activity.takeScreenShot(): Bitmap? {
     val view: View = window.decorView
     view.isDrawingCacheEnabled = true
@@ -50,8 +72,8 @@ fun Activity.takeScreenShot(): Bitmap? {
         bitmap,
         0,
         0,
-        widthHeight[0],
-        widthHeight[1] - 0
+        widthHeight[WIDTH_INDEX],
+        widthHeight[HEIGHT_INDEX] - 0
     )
     view.destroyDrawingCache()
     return bitmapResult
@@ -82,6 +104,20 @@ fun getScreenSize(context: Context): IntArray {
 
 private fun isScreenSizeRetrieved(widthHeight: IntArray): Boolean {
     return widthHeight[WIDTH_INDEX] != 0 && widthHeight[HEIGHT_INDEX] != 0
+}
+
+fun String.getColor(): Int? {
+    try {
+        var color = this
+        if (!color.startsWith("#"))
+            color = "#$color"
+        Color.parseColor(color)
+            .let {
+                return it
+            }
+    } catch (e: Exception) {
+        return null
+    }
 }
 
 const val WIDTH_INDEX = 0

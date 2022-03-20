@@ -26,7 +26,8 @@ class PreviewActivity : AppCompatActivity() {
                     .setCustomResId(R.layout.layout_custom_view_sample)
                     .setItems(getMenuItems())
                     .setCallBack(object : ContextDialog.ContextDialogCallBack {
-                        override fun returned(item: Menu?, position: Int) {
+                        override fun returned(item: Menu?, position: Int,dialog: ContextDialog) {
+                            dialog.dismiss()
                             item?.let { it ->
                                 Toast.makeText(this@PreviewActivity, it.title, Toast.LENGTH_SHORT)
                                     .show()
