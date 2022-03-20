@@ -6,6 +6,7 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import androidx.annotation.DrawableRes
 import androidx.annotation.IdRes
+import androidx.core.content.ContextCompat
 import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.GlideException
@@ -22,6 +23,11 @@ import com.sedo.contextmenu.utils.extensions.px
 @BindingAdapter("ivSetSrcImageFromResources")
 fun ImageView.setImageFromResources(@DrawableRes imageRes: Int) {
     setImageResource(imageRes)
+}
+
+@BindingAdapter("bind_tint_color")
+fun ImageView.setImageTint(tintColor: Int?) {
+    tintColor?.let { ContextCompat.getColor(context, it) }?.let { setColorFilter(it, android.graphics.PorterDuff.Mode.SRC_IN) };
 }
 
 @BindingAdapter("imageRec")

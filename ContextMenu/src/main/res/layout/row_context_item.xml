@@ -24,10 +24,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            bind_text_color="@{data.titleColor}"
             android:layout_marginStart="@dimen/_10sdp"
             android:layout_marginTop="@dimen/_15sdp"
             android:layout_marginBottom="@dimen/_15sdp"
             android:text="@{data.title}"
+
             tools:text="Account" />
 
         <ImageView
@@ -35,6 +37,7 @@
             android:layout_width="@dimen/_18sdp"
             android:layout_height="@dimen/_18sdp"
             android:layout_marginEnd="@dimen/_10sdp"
+            bind_tint_color="@{data.iconTint}"
             android:layout_marginTop="@dimen/_15sdp"
             android:layout_marginBottom="@dimen/_15sdp" />
     </LinearLayout>
