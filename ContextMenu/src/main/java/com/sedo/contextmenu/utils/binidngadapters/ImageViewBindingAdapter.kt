@@ -1,5 +1,6 @@
 package com.sedo.contextmenu.utils.binidngadapters
 
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.view.View
 import android.widget.ImageView
@@ -9,15 +10,15 @@ import androidx.annotation.IdRes
 import androidx.core.content.ContextCompat
 import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.sedo.contextmenu.R
-import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.BaseRequestOptions
+import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.request.target.Target
+import com.sedo.contextmenu.R
 import com.sedo.contextmenu.utils.extensions.px
 
 @BindingAdapter("ivSetSrcImageFromResources")
@@ -25,9 +26,16 @@ fun ImageView.setImageFromResources(@DrawableRes imageRes: Int) {
     setImageResource(imageRes)
 }
 
+@BindingAdapter("bind_tint_hex_color")
+fun ImageView.setTintHex(tintColor: String?) {
+    tintColor?.let { Color.parseColor(tintColor) }
+        ?.let { setColorFilter(it, android.graphics.PorterDuff.Mode.SRC_IN) }
+}
+
 @BindingAdapter("bind_tint_color")
 fun ImageView.setImageTint(tintColor: Int?) {
-    tintColor?.let { ContextCompat.getColor(context, it) }?.let { setColorFilter(it, android.graphics.PorterDuff.Mode.SRC_IN) };
+    tintColor?.let { ContextCompat.getColor(context, it) }
+        ?.let { setColorFilter(it, android.graphics.PorterDuff.Mode.SRC_IN) }
 }
 
 @BindingAdapter("imageRec")
@@ -59,7 +67,7 @@ fun ImageView.loadImage(
     imageIsRoundedCorners: Boolean = false,
     roundingRadius: Int? = null
 ) {
-    if(image is Int){
+    if (image is Int) {
         setImageFromResources(image)
         return
     }
