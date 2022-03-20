@@ -28,8 +28,18 @@ fun ImageView.setImageFromResources(@DrawableRes imageRes: Int) {
 
 @BindingAdapter("bind_tint_hex_color")
 fun ImageView.setTintHex(tintColor: String?) {
-    tintColor?.let { Color.parseColor(tintColor) }
-        ?.let { setColorFilter(it, android.graphics.PorterDuff.Mode.SRC_IN) }
+    try {
+        var color: String?
+        tintColor?.let {
+            color = tintColor
+            if (color?.startsWith("#") == false)
+                color = "#$color"
+            Color.parseColor(color)
+                .let { setColorFilter(it, android.graphics.PorterDuff.Mode.SRC_IN) }
+        }
+    } catch (e: Exception) {
+
+    }
 }
 
 @BindingAdapter("bind_tint_color")

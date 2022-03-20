@@ -13,6 +13,15 @@ fun TextView.setTextColor(color: Int?) {
 
 @BindingAdapter("bind_text_hex_color")
 fun TextView.setTextColorHex(tintColor: String?) {
-    tintColor?.let { Color.parseColor(tintColor) }
-        ?.let { setTextColor(it) }
+    try {
+        var color: String?
+        tintColor?.let {
+            color = tintColor
+            if (color?.startsWith("#") == false)
+                color = "#$color"
+            Color.parseColor(color).let { setTextColor(it) }
+        }
+    } catch (e: Exception) {
+
+    }
 }
