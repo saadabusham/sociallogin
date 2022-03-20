@@ -14,8 +14,8 @@ import android.renderscript.ScriptIntrinsicBlur
 import android.util.DisplayMetrics
 import android.view.View
 import android.view.WindowManager
-import com.sedo.contextmenu.utils.BlurMaker
 import com.sedo.contextmenu.utils.BlurFactor
+import com.sedo.contextmenu.utils.BlurMaker.blur
 
 
 fun Activity.blur(blur: Float? = null): Bitmap? {
@@ -46,9 +46,8 @@ fun Activity.blur(blur: Float? = null, colorHex: String? = null, color: Int? = n
     }
     val bitmap: Bitmap? = this.takeScreenShot()
     val widthHeight: IntArray = getScreenSize(this)
-    return BlurMaker.of(
+    return bitmap?.blur(
         this,
-        bitmap,
         BlurFactor(
             radius = blur.toInt(),
             colorHex = colorHex,

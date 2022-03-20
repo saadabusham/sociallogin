@@ -8,17 +8,17 @@ import com.sedo.contextmenu.utils.BlurryHelper.hasZero
 import com.sedo.contextmenu.utils.extensions.getColor
 
 object BlurMaker {
-    fun of(view: View, factor: BlurFactor): Bitmap? {
+    fun View.blur(view: View, factor: BlurFactor): Bitmap? {
         view.isDrawingCacheEnabled = true
         view.destroyDrawingCache()
         view.drawingCacheQuality = View.DRAWING_CACHE_QUALITY_LOW
         val cache = view.drawingCache
-        val bitmap = of(view.context, cache, factor)
+        val bitmap = cache.blur(view.context, factor)
         cache.recycle()
         return bitmap
     }
 
-    fun of(context: Context, source: Bitmap?, factor: BlurFactor): Bitmap? {
+    fun Bitmap.blur(context: Context, factor: BlurFactor): Bitmap? {
         val width = factor.width / factor.sampling
         val height = factor.height / factor.sampling
         if (hasZero(width, height)) {
@@ -34,7 +34,7 @@ object BlurMaker {
             PorterDuff.Mode.SRC_ATOP
         )
         paint.colorFilter = filter
-        canvas.drawBitmap(source!!, 0f, 0f, paint)
+        canvas.drawBitmap(this, 0f, 0f, paint)
         bitmap = try {
             rs(context, bitmap, factor.radius)
         } catch (e: RSRuntimeException) {
