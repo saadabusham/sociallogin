@@ -38,17 +38,19 @@ class ContextDialog private constructor(
     private var layoutParams: RelativeLayout.LayoutParams? = null
     private lateinit var binding: DialogContextMenuBinding
     private lateinit var contextMenuRecyclerAdapter: ContextMenuRecyclerAdapter
-
+    private var context : Activity = builder.context
     private var viewGroup: ViewGroup? = null
     private var view: View? = null
     private var items: MutableList<Menu> = mutableListOf()
     private var callBack: ContextDialogCallBack? = null
     private var customViewResId: Int? = null
     private var customData: CustomData? = null
+    private var cornerRadius: Float? = null
     private var fillWidth: Boolean? = null
     private var height: Int? = null
     private var width: Int? = null
     private var blur: Float? = null
+    private var backgroundColor: Int? = null
 
     init {
         with(builder) {
@@ -65,6 +67,8 @@ class ContextDialog private constructor(
             width = getWidth()
             height = getHeight()
             blur = getBlur()
+            backgroundColor = getBackgroundColor()
+            cornerRadius = getCornerRadius()
         }
     }
 
@@ -101,8 +105,13 @@ class ContextDialog private constructor(
 
     private fun setUpViews() {
         binding.cvContent.let { cvContent ->
-            builder.getCornerRadius()?.let {
+            cornerRadius?.let {
                 cvContent.radius = it
+            }
+            backgroundColor?.let {
+                context.resources.getColor(it).let {
+                    cvContent.setCardBackgroundColor(it)
+                }
             }
         }
 
@@ -214,7 +223,7 @@ class ContextDialog private constructor(
         // First get bitmap with blur filter applied, using the function blur presented here,
         // or another function.
         // Activity parameter is the Activity for which you call dialog.show();
-        val bitmap: Bitmap? = builder.context.blur(blur)
+        val bitmap: Bitmap? = context.blur(blur)
 
         // Get bitmap height.
         bitmap?.let {
@@ -222,11 +231,11 @@ class ContextDialog private constructor(
             setOnShowListener { dialogInterface ->
                 // When dialog is shown, before set new blurred image for background drawable,
                 // the root view height and dialog margin are saved.
-                val rootViewHeight: Int = binding.root?.height ?: 0
+                val rootViewHeight: Int = binding.root.height ?: 0
                 val marginLeftAndRight: Int = window?.decorView?.paddingLeft ?: 0
 
                 // Set new blurred image for background drawable.
-                window?.setBackgroundDrawable(BitmapDrawable(builder.context.resources, bitmap))
+                window?.setBackgroundDrawable(BitmapDrawable(context.resources, bitmap))
 
                 // After get positions and heights, recover and rebuild original marginTop position,
                 // that is (bitmapHeight - rootViewHeight) / 2.
@@ -339,6 +348,7 @@ class ContextDialog private constructor(
         private var height: Int? = null
         private var width: Int? = null
         private var blur: Float? = null
+        private var backgroundColor: Int? = null
 
         fun setView(view: View): Builder {
             this.view = view
@@ -374,6 +384,15 @@ class ContextDialog private constructor(
 
         fun getCustomViewResId(): Int? {
             return customViewResId
+        }
+
+        fun setBackgroundColor(backgroundColor: Int?): Builder {
+            this.backgroundColor = backgroundColor
+            return this
+        }
+
+        fun getBackgroundColor(): Int? {
+            return backgroundColor
         }
 
         fun setCustomData(customData: CustomData?): Builder {
