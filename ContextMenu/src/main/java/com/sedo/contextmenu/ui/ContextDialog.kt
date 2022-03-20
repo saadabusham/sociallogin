@@ -5,6 +5,8 @@ import android.app.Dialog
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -78,7 +80,6 @@ class ContextDialog private constructor(
         setUpBindingView()
         setUpBinding()
         setUpViews()
-        setUpListeners()
     }
 
     private fun setUpBindingView() {
@@ -118,8 +119,11 @@ class ContextDialog private constructor(
         if (isCustomView()) {
             setUpCustomView()
         } else {
-            removeFromGroupView()
+            Handler(Looper.getMainLooper()).postDelayed({
+                removeFromGroupView()
+            }, 0)
         }
+        setUpListeners()
     }
 
     private fun setUpCustomView() {
@@ -223,6 +227,7 @@ class ContextDialog private constructor(
         // First get bitmap with blur filter applied, using the function blur presented here,
         // or another function.
         // Activity parameter is the Activity for which you call dialog.show();
+
         val bitmap: Bitmap? = context.blur(blur)
 
         // Get bitmap height.

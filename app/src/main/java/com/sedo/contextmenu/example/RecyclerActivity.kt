@@ -44,16 +44,17 @@ class RecyclerActivity : AppCompatActivity() {
                         .setItems(getMenuItems())
                         .setFillWidth(true)
                         .setBlur(20f)
-                        .setCustomData(
-                            CustomData(
-                                image = image,
-                                title = "No Title",
-                                date = "19/3/2022",
-                                subtitle = "No SubTitle",
-                                backgroundColor = R.color.white,
-                                cornerRadius = resources.getDimension(R.dimen._10sdp)
-                            )
-                        )
+//                        .setCustomData(
+//                            CustomData(
+//                                image = image,
+//                                title = "No Title",
+//                                date = "19/3/2022",
+//                                subtitle = "No SubTitle",
+//                                backgroundColor = R.color.white,
+//                                cornerRadius = resources.getDimension(R.dimen._10sdp)
+//                            )
+//                        )
+                        .setView(it)
                         .setCornerRadius(resources.getDimension(R.dimen._10sdp))
                         .setCustomResId(R.layout.layout_custom_view_sample)
                         .setCallBack(object : ContextDialog.ContextDialogCallBack {
