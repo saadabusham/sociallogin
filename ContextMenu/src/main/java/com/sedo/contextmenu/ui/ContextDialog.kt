@@ -195,34 +195,35 @@ class ContextDialog private constructor(
 
     private fun setUpListeners() {
         setOnDismissListener {
-            try {
-                binding.viewContainer.removeView(view)
-                if (viewGroup !is RecyclerView) {
-                    when (viewGroup) {
-                        is LinearLayout -> {
-                            viewGroup?.addView(view, viewIndex)
-                        }
-                        is RelativeLayout -> {
-                            viewGroup?.addView(view, layoutParams)
-                        }
-                        else -> {
-                            viewGroup?.addView(view)
-                        }
-                    }
-                    animateView()
-                    enableDisablePopView(true)
-                }
-                callBack?.returned(selectedItem, selectedPosition)
-            } catch (e: Exception) {
-                Log.d("Context Menu", e.localizedMessage)
-            }
+           clearView()
         }
         setBackgroundBlur()
         view?.setOnClickListener {
-            callBack?.rootViewClicked(it)
+            callBack?.rootViewClicked(it,this)
         }
     }
-
+    private fun clearView(){
+        try {
+            binding.viewContainer.removeView(view)
+            if (viewGroup !is RecyclerView) {
+                when (viewGroup) {
+                    is LinearLayout -> {
+                        viewGroup?.addView(view, viewIndex)
+                    }
+                    is RelativeLayout -> {
+                        viewGroup?.addView(view, layoutParams)
+                    }
+                    else -> {
+                        viewGroup?.addView(view)
+                    }
+                }
+                animateView()
+                enableDisablePopView(true)
+            }
+        } catch (e: Exception) {
+            Log.d("Context Menu", e.localizedMessage)
+        }
+    }
     private fun setBackgroundBlur() {
         // First get bitmap with blur filter applied, using the function blur presented here,
         // or another function.
@@ -325,7 +326,7 @@ class ContextDialog private constructor(
             override fun onItemClick(view: View?, position: Int, item: Any) {
                 selectedItem = item as Menu
                 selectedPosition = position
-                dismiss()
+                callBack?.returned(selectedItem, selectedPosition,this@ContextDialog)
             }
 
         })
@@ -338,8 +339,8 @@ class ContextDialog private constructor(
     }
 
     interface ContextDialogCallBack {
-        fun returned(item: Menu?, position: Int) {}
-        fun rootViewClicked(view: View) {}
+        fun returned(item: Menu?, position: Int,dialog: ContextDialog) {}
+        fun rootViewClicked(view: View,dialog: ContextDialog) {}
     }
 
     class Builder(val context: Activity) {

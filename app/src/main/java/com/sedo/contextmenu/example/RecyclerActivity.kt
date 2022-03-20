@@ -58,7 +58,8 @@ class RecyclerActivity : AppCompatActivity() {
                         .setCornerRadius(resources.getDimension(R.dimen._10sdp))
                         .setCustomResId(R.layout.layout_custom_view_sample)
                         .setCallBack(object : ContextDialog.ContextDialogCallBack {
-                            override fun returned(item: Menu?, position: Int) {
+                            override fun returned(item: Menu?, position: Int,dialog: ContextDialog) {
+                                dialog.dismiss()
                                 when (position) {
                                     1 -> {
                                         startActivity(
@@ -81,14 +82,14 @@ class RecyclerActivity : AppCompatActivity() {
                                 }
                             }
 
-                            override fun rootViewClicked(view: View) {
-                                super.rootViewClicked(view)
+                            override fun rootViewClicked(view: View,dialog: ContextDialog) {
+                                super.rootViewClicked(view,dialog)
+                                dialog.dismiss()
                                 startActivity(
                                     Intent(
                                         this@RecyclerActivity,
                                         PreviewActivity::class.java
-                                    )
-                                        .putExtra("imageRes", image as Int)
+                                    ).putExtra("imageRes", image as Int)
                                 )
                             }
                         })
