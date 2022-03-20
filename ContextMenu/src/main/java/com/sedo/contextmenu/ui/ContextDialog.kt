@@ -1,7 +1,9 @@
 package com.sedo.contextmenu.ui
 
+import android.app.Activity
 import android.app.Dialog
-import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,10 +12,7 @@ import android.view.ViewGroup
 import android.view.Window
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.RelativeLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.cardview.widget.CardView
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -25,6 +24,7 @@ import com.sedo.contextmenu.ui.adapters.ContextMenuRecyclerAdapter
 import com.sedo.contextmenu.ui.base.BaseBindingRecyclerViewAdapter
 import com.sedo.contextmenu.utils.*
 import com.sedo.contextmenu.utils.binidngadapters.loadImage
+import com.sedo.contextmenu.utils.extensions.blur
 import com.sedo.contextmenu.utils.extensions.setOnItemClickListener
 
 
@@ -36,7 +36,7 @@ class ContextDialog private constructor(
     private var viewIndex = 0
     private var selectedItem: Menu? = null
     private var layoutParams: RelativeLayout.LayoutParams? = null
-    private lateinit var dialogContextMenuBinding: DialogContextMenuBinding
+    private lateinit var binding: DialogContextMenuBinding
     private lateinit var contextMenuRecyclerAdapter: ContextMenuRecyclerAdapter
 
     private var viewGroup: ViewGroup? = null
@@ -46,6 +46,9 @@ class ContextDialog private constructor(
     private var customViewResId: Int? = null
     private var customData: CustomData? = null
     private var fillWidth: Boolean? = null
+    private var height: Int? = null
+    private var width: Int? = null
+    private var blur: Float? = null
 
     init {
         with(builder) {
@@ -59,6 +62,9 @@ class ContextDialog private constructor(
             customViewResId = getCustomViewResId()
             customData = getCustomData()
             fillWidth = getFillWidth()
+            width = getWidth()
+            height = getHeight()
+            blur = getBlur()
         }
     }
 
@@ -72,21 +78,21 @@ class ContextDialog private constructor(
     }
 
     private fun setUpBindingView() {
-        dialogContextMenuBinding =
+        binding =
             DataBindingUtil.inflate(
                 LayoutInflater.from(context),
                 R.layout.dialog_context_menu,
                 null,
                 false
             )
-        setContentView(dialogContextMenuBinding.root)
+        setContentView(binding.root)
         setCancelable(true)
         setUpBinding()
         setUpMenuRecyclerView()
     }
 
     private fun setUpBinding() {
-        dialogContextMenuBinding.viewModel = this
+        binding.viewModel = this
     }
 
     private fun isCustomView(): Boolean {
@@ -94,7 +100,7 @@ class ContextDialog private constructor(
     }
 
     private fun setUpViews() {
-        dialogContextMenuBinding.cvContent?.let { cvContent ->
+        binding.cvContent.let { cvContent ->
             builder.getCornerRadius()?.let {
                 cvContent.radius = it
             }
@@ -163,6 +169,13 @@ class ContextDialog private constructor(
                 cvRoot.radius = it
             }
         }
+        var params = view?.layoutParams
+        if (params == null) {
+            view?.layoutParams = LinearLayout.LayoutParams(
+                width ?: LinearLayout.LayoutParams.MATCH_PARENT,
+                height ?: LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
 
         addView()
     }
@@ -170,7 +183,7 @@ class ContextDialog private constructor(
     private fun setUpListeners() {
         setOnDismissListener {
             try {
-                dialogContextMenuBinding.viewContainer.removeView(view)
+                binding.viewContainer.removeView(view)
                 if (viewGroup !is RecyclerView) {
                     when (viewGroup) {
                         is LinearLayout -> {
@@ -191,8 +204,41 @@ class ContextDialog private constructor(
                 Log.d("Context Menu", e.localizedMessage)
             }
         }
+        setBackgroundBlur()
         view?.setOnClickListener {
             callBack?.rootViewClicked(it)
+        }
+    }
+
+    private fun setBackgroundBlur() {
+        // First get bitmap with blur filter applied, using the function blur presented here,
+        // or another function.
+        // Activity parameter is the Activity for which you call dialog.show();
+        val bitmap: Bitmap? = builder.context.blur(blur)
+
+        // Get bitmap height.
+        bitmap?.let {
+            val bitmapHeight = bitmap.height
+            setOnShowListener { dialogInterface ->
+                // When dialog is shown, before set new blurred image for background drawable,
+                // the root view height and dialog margin are saved.
+                val rootViewHeight: Int = binding.root?.height ?: 0
+                val marginLeftAndRight: Int = window?.decorView?.paddingLeft ?: 0
+
+                // Set new blurred image for background drawable.
+                window?.setBackgroundDrawable(BitmapDrawable(builder.context.resources, bitmap))
+
+                // After get positions and heights, recover and rebuild original marginTop position,
+                // that is (bitmapHeight - rootViewHeight) / 2.
+                // Also recover and rebuild Dialog original left and right margin.
+                val rootViewLayoutParams = binding.root.layoutParams as FrameLayout.LayoutParams
+                rootViewLayoutParams.setMargins(
+                    marginLeftAndRight,
+                    (bitmapHeight - rootViewHeight) / 2,
+                    marginLeftAndRight,
+                    0
+                )
+            }
         }
     }
 
@@ -223,12 +269,18 @@ class ContextDialog private constructor(
     }
 
     private fun addView() {
-        val insertPoint = dialogContextMenuBinding.viewContainer as ViewGroup
+        val insertPoint = binding.viewContainer as ViewGroup
         var params = view?.layoutParams
+        if (params == null) {
+            params = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
         if (fillWidth != null && fillWidth == true) {
             params = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT
+                LinearLayout.LayoutParams.WRAP_CONTENT
             )
         }
         insertPoint.addView(
@@ -253,8 +305,8 @@ class ContextDialog private constructor(
 
     private fun setUpMenuRecyclerView() {
         contextMenuRecyclerAdapter = ContextMenuRecyclerAdapter(context)
-        dialogContextMenuBinding.recyclerView.adapter = contextMenuRecyclerAdapter
-        dialogContextMenuBinding.recyclerView.setOnItemClickListener(object :
+        binding.recyclerView.adapter = contextMenuRecyclerAdapter
+        binding.recyclerView.setOnItemClickListener(object :
             BaseBindingRecyclerViewAdapter.OnItemClickListener {
             override fun onItemClick(view: View?, position: Int, item: Any) {
                 selectedItem = item as Menu
@@ -263,7 +315,7 @@ class ContextDialog private constructor(
             }
 
         })
-        dialogContextMenuBinding.recyclerView.addItemDecoration(
+        binding.recyclerView.addItemDecoration(
             DividerItemDecorator(
                 context.resources.getDrawable(R.drawable.divider), 0, 0
             )
@@ -276,7 +328,7 @@ class ContextDialog private constructor(
         fun rootViewClicked(view: View) {}
     }
 
-    class Builder(val context: Context) {
+    class Builder(val context: Activity) {
         private var view: View? = null
         private var items: MutableList<Menu> = mutableListOf()
         private var callBack: ContextDialogCallBack? = null
@@ -284,6 +336,9 @@ class ContextDialog private constructor(
         private var customData: CustomData? = null
         private var cornerRadius: Float? = null
         private var fillWidth: Boolean? = null
+        private var height: Int? = null
+        private var width: Int? = null
+        private var blur: Float? = null
 
         fun setView(view: View): Builder {
             this.view = view
@@ -346,6 +401,33 @@ class ContextDialog private constructor(
 
         fun getFillWidth(): Boolean? {
             return fillWidth
+        }
+
+        fun setHeight(height: Int?): Builder {
+            this.height = height
+            return this
+        }
+
+        fun getHeight(): Int? {
+            return height
+        }
+
+        fun setWidth(width: Int?): Builder {
+            this.width = width
+            return this
+        }
+
+        fun getWidth(): Int? {
+            return width
+        }
+
+        fun setBlur(blur: Float?): Builder {
+            this.blur = blur
+            return this
+        }
+
+        fun getBlur(): Float? {
+            return blur
         }
 
         fun build(): ContextDialog {

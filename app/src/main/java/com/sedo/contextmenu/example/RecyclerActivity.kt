@@ -43,6 +43,7 @@ class RecyclerActivity : AppCompatActivity() {
                     ContextDialog.Builder(this@RecyclerActivity)
                         .setItems(getMenuItems())
                         .setFillWidth(true)
+                        .setBlur(20f)
                         .setCustomData(
                             CustomData(
                                 image = image,
