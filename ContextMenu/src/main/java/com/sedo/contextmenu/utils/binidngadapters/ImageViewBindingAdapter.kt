@@ -70,8 +70,8 @@ fun ImageView?.setImageFromRec(
 )
 fun ImageView.loadImage(
     image: Any?,
-    @DrawableRes imagePlaceholder: Int? = R.drawable.ic_default_image_place_holder,
-    @DrawableRes imageErrorPlaceholder: Int? = R.drawable.ic_default_image_place_holder,
+    @DrawableRes imagePlaceholder: Int? = R.drawable.ic_context_menu_default_image_place_holder,
+    @DrawableRes imageErrorPlaceholder: Int? = R.drawable.ic_context_menu_default_image_place_holder,
     @IdRes imageProgressId: Int? = null,
     imageIsCircle: Boolean = false,
     imageIsRoundedCorners: Boolean = false,
@@ -83,7 +83,7 @@ fun ImageView.loadImage(
     }
     image as String
     if (image.isNullOrEmpty()) {
-        setImageResource(imageErrorPlaceholder ?: R.drawable.ic_default_image_place_holder)
+        setImageResource(imageErrorPlaceholder ?: R.drawable.ic_context_menu_default_image_place_holder)
         return
     }
 
@@ -114,9 +114,9 @@ fun ImageView.loadImage(
                 return false
             }
         })
-        .placeholder(imagePlaceholder ?: R.drawable.ic_default_image_place_holder)
+        .placeholder(imagePlaceholder ?: R.drawable.ic_context_menu_default_image_place_holder)
         .apply(setUpRequestOptions(imageIsCircle, imageIsRoundedCorners, roundingRadius ?: 10))
-        .error(imageErrorPlaceholder ?: R.drawable.ic_default_image_place_holder)
+        .error(imageErrorPlaceholder ?: R.drawable.ic_context_menu_default_image_place_holder)
         .into(this)
 }
 
