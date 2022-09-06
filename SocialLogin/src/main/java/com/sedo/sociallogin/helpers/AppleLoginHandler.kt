@@ -2,6 +2,7 @@ package com.sedo.sociallogin.helpers
 
 import android.content.Intent
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.fragment.app.Fragment
@@ -60,65 +61,71 @@ class AppleLoginHandler private constructor(
     }
 
     override fun startMethod() {
-        val provider = OAuthProvider.newBuilder("apple.com")
-        provider.scopes = arrayOf("email", "name").toMutableList()
-        provider.addCustomParameter("locale", "en")
+        try{
+            val provider = OAuthProvider.newBuilder("apple.com")
+            provider.scopes = arrayOf("email", "name").toMutableList()
+            provider.addCustomParameter("locale", "en")
 
-        val auth: FirebaseAuth = FirebaseAuth.getInstance()
-        val pending = auth.pendingAuthResult
+            val auth: FirebaseAuth = FirebaseAuth.getInstance()
+            val pending = auth.pendingAuthResult
 
-        pending?.addOnSuccessListener { authResult ->
-            //success
-            val user = authResult.user
-            user?.getIdToken(false)?.addOnSuccessListener {
-                it.token?.let { it1 ->
-                    instance?.socialLoginCallBack?.onSuccess(
-                        SocialTypeEnum.APPLE,
-                        it1
-                    )
-                }
-            }?.addOnFailureListener {
-
-            }
-        }?.addOnFailureListener { e ->
-            Log.d("aaaa", "Apple addOnFailureListener -> " + e.message)
-        }
-        fragment?.requireActivity()?.let {
-            auth.startActivityForSignInWithProvider(it, provider.build())
-                .addOnSuccessListener { authResult ->
-                    // Sign-in successful!
-
-                    val user = authResult.user
-                    user?.getIdToken(false)?.addOnSuccessListener {
-                        it.token?.let { it1 ->
-                            instance?.socialLoginCallBack?.onSuccess(
-                                SocialTypeEnum.APPLE,
-                                it1
-                            )
-                        }
-                    }?.addOnFailureListener {
-
+            pending?.addOnSuccessListener { authResult ->
+                //success
+                val user = authResult.user
+                user?.getIdToken(false)?.addOnSuccessListener {
+                    it.token?.let { it1 ->
+                        instance?.socialLoginCallBack?.onSuccess(
+                            SocialTypeEnum.APPLE,
+                            it1
+                        )
                     }
-                    //                val abc= user!!.providerData[1]
-                    //                if (abc.uid != "") {
-                    //                    id=abc.uid
-                    //                }
-                    //                if (!user.displayName.isNullOrEmpty()) {
-                    //                    userName = user!!.displayName!!
-                    //                }else{
-                    //                    userName=""
-                    //                }
-                    //
-                    //                if (user.email != "") {
-                    //                    mail= user!!.email!!
-                    //                }
+                }?.addOnFailureListener {
 
-                    // logA("Apple Sign In Success -> “
                 }
-                .addOnFailureListener { e ->
-                    // logA("Apple Sign In Fail -> " + e.message)
-                    e.printStackTrace()
-                }
+            }?.addOnFailureListener { e ->
+                Log.d("aaaa", "Apple addOnFailureListener -> " + e.message)
+            }
+            fragment?.requireActivity()?.let {
+                auth.startActivityForSignInWithProvider(it, provider.build())
+                    .addOnSuccessListener { authResult ->
+                        // Sign-in successful!
+
+                        val user = authResult.user
+                        user?.getIdToken(false)?.addOnSuccessListener {
+                            it.token?.let { it1 ->
+                                instance?.socialLoginCallBack?.onSuccess(
+                                    SocialTypeEnum.APPLE,
+                                    it1
+                                )
+                            }
+                        }?.addOnFailureListener {
+
+                        }
+                        //                val abc= user!!.providerData[1]
+                        //                if (abc.uid != "") {
+                        //                    id=abc.uid
+                        //                }
+                        //                if (!user.displayName.isNullOrEmpty()) {
+                        //                    userName = user!!.displayName!!
+                        //                }else{
+                        //                    userName=""
+                        //                }
+                        //
+                        //                if (user.email != "") {
+                        //                    mail= user!!.email!!
+                        //                }
+
+                        // logA("Apple Sign In Success -> “
+                    }
+                    .addOnFailureListener { e ->
+                        // logA("Apple Sign In Fail -> " + e.message)
+                        e.printStackTrace()
+                    }
+            }
+        }catch (e:Exception){
+            getContext()?.let {
+                Toast.makeText(it,e.message,Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }

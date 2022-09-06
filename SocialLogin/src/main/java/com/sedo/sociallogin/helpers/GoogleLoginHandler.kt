@@ -92,15 +92,21 @@ class GoogleLoginHandler private constructor(
     }
 
     override fun startMethod() {
-        val account = getContext()?.let { GoogleSignIn.getLastSignedInAccount(it) }
-        if (account == null) {
-            if (resultLauncher != null) {
-                resultLauncher?.launch(mGoogleSignInClient?.signInIntent)
+        try {
+            val account = getContext()?.let { GoogleSignIn.getLastSignedInAccount(it) }
+            if (account == null) {
+                if (resultLauncher != null) {
+                    resultLauncher?.launch(mGoogleSignInClient?.signInIntent)
+                } else {
+                    defaultResultLauncher?.launch(mGoogleSignInClient?.signInIntent)
+                }
             } else {
-                defaultResultLauncher?.launch(mGoogleSignInClient?.signInIntent)
+                mGoogleSignInClient?.signOut()
             }
-        } else {
-            mGoogleSignInClient?.signOut()
+        }catch (e:Exception){
+            getContext()?.let {
+                Toast.makeText(it,e.message,Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
