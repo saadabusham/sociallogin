@@ -12,7 +12,7 @@ import com.sedo.sociallogin.`interface`.SocialLoginCallBack
 import com.sedo.sociallogin.data.enums.SocialTypeEnum
 
 class AppleLoginHandler private constructor(
-    mActivity: ComponentActivity? = null,
+    mActivity: ComponentActivity,
     mFragment: Fragment? = null
 ) : ISocialLogin(mActivity, mFragment) {
 
@@ -22,7 +22,7 @@ class AppleLoginHandler private constructor(
         private var instance: AppleLoginHandler? = null
 
         fun getInstance(
-            activity: ComponentActivity? = null,
+            activity: ComponentActivity,
             fragment: Fragment? = null
         ): AppleLoginHandler =
             instance
@@ -31,7 +31,7 @@ class AppleLoginHandler private constructor(
                 ).also { instance = it }
 
         fun recreateInstance(
-            activity: ComponentActivity? = null,
+            activity: ComponentActivity,
             fragment: Fragment? = null
         ): AppleLoginHandler {
             instance = null
@@ -85,7 +85,7 @@ class AppleLoginHandler private constructor(
             }?.addOnFailureListener { e ->
                 Log.d("aaaa", "Apple addOnFailureListener -> " + e.message)
             }
-            fragment?.requireActivity()?.let {
+            activity?.let {
                 auth.startActivityForSignInWithProvider(it, provider.build())
                     .addOnSuccessListener { authResult ->
                         // Sign-in successful!
