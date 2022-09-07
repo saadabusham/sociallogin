@@ -21,35 +21,6 @@ class GoogleLoginHandler private constructor(
     clientId: String?
 ) : ISocialLogin(mActivity, mFragment, clientId) {
 
-    companion object {
-
-        @Volatile
-        private var INSTANCE: GoogleLoginHandler? = null
-
-        fun getInstance(
-            activity: ComponentActivity? = null,
-            fragment: Fragment? = null,
-            clientId: String? = null
-        ): GoogleLoginHandler =
-            INSTANCE
-                ?: GoogleLoginHandler(
-                    activity, fragment, clientId
-                ).also { INSTANCE = it }
-
-        fun recreateInstance(
-            activity: ComponentActivity? = null,
-            fragment: Fragment? = null,
-            clientId: String? = null
-        ): GoogleLoginHandler {
-            INSTANCE = null
-            return INSTANCE
-                ?: GoogleLoginHandler(
-                    activity, fragment, clientId
-                )
-                    .also { INSTANCE = it }
-        }
-    }
-
     override fun showError(show: Boolean) {
         this.showError = show
     }
@@ -135,6 +106,35 @@ class GoogleLoginHandler private constructor(
                 Toast.makeText(it, "signInResult:failed code=" + e.statusCode, Toast.LENGTH_SHORT)
                     .show()
             }
+        }
+    }
+
+    companion object {
+
+        @Volatile
+        private var INSTANCE: GoogleLoginHandler? = null
+
+        fun getInstance(
+            activity: ComponentActivity? = null,
+            fragment: Fragment? = null,
+            clientId: String? = null
+        ): GoogleLoginHandler =
+            INSTANCE
+                ?: GoogleLoginHandler(
+                    activity, fragment, clientId
+                ).also { INSTANCE = it }
+
+        fun recreateInstance(
+            activity: ComponentActivity? = null,
+            fragment: Fragment? = null,
+            clientId: String? = null
+        ): GoogleLoginHandler {
+            INSTANCE = null
+            return INSTANCE
+                ?: GoogleLoginHandler(
+                    activity, fragment, clientId
+                )
+                    .also { INSTANCE = it }
         }
     }
 

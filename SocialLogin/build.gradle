@@ -47,6 +47,9 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 //    google login
     implementation 'com.google.android.gms:play-services-auth:20.3.0'
+//    Firebase Auth (Used to Apple Login)
     implementation 'com.google.firebase:firebase-auth-ktx:21.0.8'
+//    facebook login
+    implementation 'com.facebook.android:facebook-login:4.42.0'
 
 }

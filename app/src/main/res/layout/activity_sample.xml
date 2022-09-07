@@ -43,5 +43,20 @@
             app:iconPadding="@dimen/_10sdp"
             app:iconTint="@null" />
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnFaceBook"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_40sdp"
+            android:layout_marginBottom="@dimen/_10sdp"
+            android:backgroundTint="@color/black"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:text="Facebook"
+            android:textSize="@dimen/_14ssp"
+            app:icon="@drawable/ic_apple"
+            app:iconGravity="textStart"
+            app:iconPadding="@dimen/_10sdp"
+            app:iconTint="@null" />
+
     </LinearLayout>
 </layout>

@@ -10,12 +10,14 @@ import com.google.android.material.button.MaterialButton
 import com.sedo.sociallogin.`interface`.SocialLoginCallBack
 import com.sedo.sociallogin.data.enums.SocialTypeEnum
 import com.sedo.sociallogin.helpers.AppleLoginHandler
+import com.sedo.sociallogin.helpers.FacebookLoginHandler
 import com.sedo.sociallogin.helpers.GoogleLoginHandler
 
 class SampleActivity : AppCompatActivity() {
 
     var googleLoginHandler: GoogleLoginHandler? = null
     var appleLoginHandler: AppleLoginHandler? = null
+    var facebookLoginHandler: FacebookLoginHandler? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,20 +33,24 @@ class SampleActivity : AppCompatActivity() {
         findViewById<MaterialButton>(R.id.btnAppleLogin)?.setOnClickListener {
             appleLoginHandler?.startMethod()
         }
+        findViewById<MaterialButton>(R.id.btnFaceBook)?.setOnClickListener {
+            facebookLoginHandler?.startMethod()
+        }
     }
 
     private fun initSocialLogin() {
         try {
-            if (googleLoginHandler == null)
-                initGoogle()
-            if (appleLoginHandler == null)
-                initApple()
+            initFacebook()
+            initGoogle()
+            initApple()
         } catch (e: Exception) {
             e
         }
     }
 
     private fun initGoogle() {
+        if (googleLoginHandler != null)
+            return
         googleLoginHandler =
             GoogleLoginHandler.getInstance(activity = this).apply {
                 setRegisterResult(googleLoginResultLauncher)
@@ -69,6 +75,8 @@ class SampleActivity : AppCompatActivity() {
 
 
     private fun initApple() {
+        if (appleLoginHandler != null)
+            return
         appleLoginHandler = AppleLoginHandler.getInstance(activity = this)
         appleLoginHandler?.showError(true)
         appleLoginHandler?.setCallBack(object : SocialLoginCallBack {
@@ -77,6 +85,19 @@ class SampleActivity : AppCompatActivity() {
             }
         })
         appleLoginHandler?.initMethod()
+    }
+
+    private fun initFacebook() {
+        if (facebookLoginHandler != null)
+            return
+        facebookLoginHandler = FacebookLoginHandler.getInstance(activity = this)
+        facebookLoginHandler?.showError(true)
+        facebookLoginHandler?.setCallBack(object : SocialLoginCallBack {
+            override fun onSuccess(provider: SocialTypeEnum, token: String) {
+                Toast.makeText(this@SampleActivity, token, Toast.LENGTH_SHORT).show()
+            }
+        })
+        facebookLoginHandler?.initMethod()
     }
 
 }
