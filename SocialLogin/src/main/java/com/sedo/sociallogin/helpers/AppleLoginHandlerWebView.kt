@@ -86,35 +86,35 @@ class AppleLoginHandlerWebView private constructor(
     }
 
     override fun startMethod() {
-//        appleAuthURLFull?.let { openWebViewDialog(it) };
-
-        val configuration = SignInWithAppleConfiguration(
-            clientId = clientId ?: "",
-            redirectUri = redirectUri ?: "",
-            scope = "email"
-        )
-
-        val signInWithAppleButton = getContext()?.let { SignInWithAppleButton(it) }
-        fragment?.childFragmentManager?.let {
-            signInWithAppleButton?.setUpSignInWithAppleOnClick(it, configuration) { result ->
-                when (result) {
-                    is SignInWithAppleResult.Success -> {
-                        // Handle success
-                        socialLoginCallBack?.onSuccess(
-                            SocialTypeEnum.APPLE,
-                            result.authorizationCode
-                        )
-                    }
-                    is SignInWithAppleResult.Failure -> {
-                        // Handle failure
-                    }
-                    is SignInWithAppleResult.Cancel -> {
-                        // Handle user cancel
-                    }
-                }
-            }
-            signInWithAppleButton?.callOnClick()
-        }
+        appleAuthURLFull?.let { openWebViewDialog(it) };
+//
+//        val configuration = SignInWithAppleConfiguration(
+//            clientId = clientId ?: "",
+//            redirectUri = redirectUri ?: "",
+//            scope = "email"
+//        )
+//
+//        val signInWithAppleButton = getContext()?.let { SignInWithAppleButton(it) }
+//        fragment?.childFragmentManager?.let {
+//            signInWithAppleButton?.setUpSignInWithAppleOnClick(it, configuration) { result ->
+//                when (result) {
+//                    is SignInWithAppleResult.Success -> {
+//                        // Handle success
+//                        socialLoginCallBack?.onSuccess(
+//                            SocialTypeEnum.APPLE,
+//                            result.authorizationCode
+//                        )
+//                    }
+//                    is SignInWithAppleResult.Failure -> {
+//                        // Handle failure
+//                    }
+//                    is SignInWithAppleResult.Cancel -> {
+//                        // Handle user cancel
+//                    }
+//                }
+//            }
+//            signInWithAppleButton?.callOnClick()
+//        }
     }
 
     override fun setResult(completedTask: Any) {
