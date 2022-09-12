@@ -12,7 +12,8 @@ import com.sedo.sociallogin.`interface`.SocialLoginCallBack
 abstract class ISocialLogin(
     val activity: ComponentActivity?,
     val fragment: Fragment?,
-    val clientId: String? = null
+    val clientId: String? = null,
+    val redirectUri: String? = null
 ) {
     abstract fun showError(show: Boolean)
     abstract fun setCallBack(socialLoginCallBack: SocialLoginCallBack)
