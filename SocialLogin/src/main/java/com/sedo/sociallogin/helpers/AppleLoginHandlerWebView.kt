@@ -3,8 +3,12 @@ package com.sedo.sociallogin.helpers
 import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
+import android.util.Log
+import android.view.Window
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -15,6 +19,8 @@ import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import com.sedo.sociallogin.`interface`.SocialLoginCallBack
 import com.sedo.sociallogin.data.enums.SocialTypeEnum
+import java.io.UnsupportedEncodingException
+import java.net.URLDecoder
 import java.util.*
 
 class AppleLoginHandlerWebView private constructor(
@@ -132,13 +138,11 @@ class AppleLoginHandlerWebView private constructor(
         getContext()?.let {
             appleLoginDialog = Dialog(it)
             val webView = WebView(it)
-            webView.isVerticalFadingEdgeEnabled
-            webView.isHorizontalScrollBarEnabled = false
-            webView.isVerticalScrollBarEnabled = false
+            webView.settings.javaScriptCanOpenWindowsAutomatically = true
+            webView.settings.javaScriptEnabled = true
             instance?.let {
                 webView.webViewClient = AppleLoginWebView(it)
             }
-            webView.settings.javaScriptEnabled = true
             webView.loadUrl(url)
             appleLoginDialog?.setContentView(webView)
             appleLoginDialog?.show()
@@ -196,6 +200,31 @@ class AppleLoginHandlerWebView private constructor(
                     false
                 }
             }
+        }
+
+        override fun onPageFinished(view: WebView, url: String) {
+            super.onPageFinished(view, url)
+            val displayRectangle = Rect()
+            val window: Window? = instance.getWindow()
+            window?.decorView?.getWindowVisibleDisplayFrame(displayRectangle)
+            val layoutparms = view.layoutParams
+            layoutparms.height = (displayRectangle.height() * 0.9f).toInt()
+            view.layoutParams = layoutparms
+        }
+
+        @Throws(UnsupportedEncodingException::class)
+        fun getUrlValues(url: String): Map<String, String?> {
+            val i = url.indexOf("?")
+            val paramsMap: MutableMap<String, String?> = HashMap()
+            if (i > -1) {
+                val searchURL = url.substring(url.indexOf("?") + 1)
+                val params = searchURL.split("&").toTypedArray()
+                for (param in params) {
+                    val temp = param.split("=").toTypedArray()
+                    paramsMap[temp[0]] = URLDecoder.decode(temp[1], "UTF-8")
+                }
+            }
+            return paramsMap
         }
     }
 }

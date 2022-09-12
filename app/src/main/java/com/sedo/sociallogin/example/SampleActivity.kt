@@ -9,14 +9,14 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.material.button.MaterialButton
 import com.sedo.sociallogin.`interface`.SocialLoginCallBack
 import com.sedo.sociallogin.data.enums.SocialTypeEnum
-import com.sedo.sociallogin.helpers.AppleLoginHandler
+import com.sedo.sociallogin.helpers.AppleLoginHandlerWebView
 import com.sedo.sociallogin.helpers.FacebookLoginHandler
 import com.sedo.sociallogin.helpers.GoogleLoginHandler
 
 class SampleActivity : AppCompatActivity() {
 
     var googleLoginHandler: GoogleLoginHandler? = null
-    var appleLoginHandler: AppleLoginHandler? = null
+    var appleLoginHandler: AppleLoginHandlerWebView? = null
     var facebookLoginHandler: FacebookLoginHandler? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,7 +77,11 @@ class SampleActivity : AppCompatActivity() {
     private fun initApple() {
         if (appleLoginHandler != null)
             return
-        appleLoginHandler = AppleLoginHandler.getInstance(activity = this)
+        appleLoginHandler = AppleLoginHandlerWebView.getInstance(
+            activity = this,
+            clientId = Constants.SocialLogin.APPLE_CLIENT_ID,
+            redirectUri = Constants.SocialLogin.APPLE_REDIRECT_URL
+        )
         appleLoginHandler?.showError(true)
         appleLoginHandler?.setCallBack(object : SocialLoginCallBack {
             override fun onSuccess(provider: SocialTypeEnum, token: String) {
