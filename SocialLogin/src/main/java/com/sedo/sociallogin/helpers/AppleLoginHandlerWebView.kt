@@ -3,24 +3,18 @@ package com.sedo.sociallogin.helpers
 import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.Rect
-import android.util.Log
-import android.view.Window
+import android.net.Uri
+import android.os.Build
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import com.sedo.sociallogin.`interface`.SocialLoginCallBack
 import com.sedo.sociallogin.data.enums.SocialTypeEnum
-import com.willowtreeapps.signinwithapplebutton.SignInWithAppleConfiguration
-import com.willowtreeapps.signinwithapplebutton.SignInWithAppleResult
-import com.willowtreeapps.signinwithapplebutton.view.SignInWithAppleButton
-import java.io.UnsupportedEncodingException
-import java.net.URLDecoder
 import java.util.*
 
 class AppleLoginHandlerWebView private constructor(
@@ -152,109 +146,56 @@ class AppleLoginHandlerWebView private constructor(
     }
 
     private class AppleLoginWebView(val instance: AppleLoginHandlerWebView) : WebViewClient() {
-        override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-            if (instance.redirectUri?.let { url?.startsWith(it) } == true) {
-                // Close the dialog after getting the authorization code
-                if (url?.contains("success=") == true) {
-
-                }
-                appleLoginDialog?.dismiss()
-                val values = getUrlValues(url ?: "")
-                if (values.isNotEmpty() && values["idToken"] != null) {
-                    appleLoginDialog?.dismiss()
-                    values["idToken"]?.let {
-                        instance.socialLoginCallBack?.onSuccess(
-                            SocialTypeEnum.APPLE,
-                            it
-                        )
-                    }
-                }
-            }
+        // for API levels < 24
+        override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
+            return isUrlOverridden(view, Uri.parse(url))
         }
 
-        override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
-            Log.i("TAG", request.url.toString())
-            try {
-                val values = getUrlValues(request.url.toString())
-
-                // Get Values Fro URL and use the values as needed
-                appleLoginDialog?.dismiss()
-            } catch (e: UnsupportedEncodingException) {
-                Log.e("Error", e.message ?: "")
-            }
-            return true
+        @RequiresApi(Build.VERSION_CODES.N)
+        override fun shouldOverrideUrlLoading(
+            view: WebView?,
+            request: WebResourceRequest?
+        ): Boolean {
+            return isUrlOverridden(view, request?.url)
         }
 
-        override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
-            Log.i("TAG", url)
-            if (instance.redirectUri?.let { url.startsWith(it) } == true) {
-                // Close the dialog after getting the authorization code
-                if (url.contains("success=")) {
-                    appleLoginDialog?.dismiss()
-                    val values = getUrlValues(url)
-                    if (values.isNotEmpty() && values["idToken"] != null) {
-                        appleLoginDialog?.dismiss()
-                        values["idToken"]?.let {
+        private fun isUrlOverridden(view: WebView?, url: Uri?): Boolean {
+            return when {
+                url == null -> {
+                    false
+                }
+                url.toString().contains("appleid.apple.com") -> {
+                    view?.loadUrl(url.toString())
+                    true
+                }
+                instance.redirectUri?.let { url.toString().contains(it) } == true -> {
+//                    Log.d(SignInWithAppleButton.SIGN_IN_WITH_APPLE_LOG_TAG, "Web view was forwarded to redirect URI")
+
+                    val codeParameter = url.getQueryParameter("code")
+                    val idToken = url.getQueryParameter("idToken")
+                    val stateParameter = url.getQueryParameter("state")
+
+                    when {
+                        codeParameter == null -> {
+//                            callback(SignInWithAppleResult.Failure(IllegalArgumentException("code not returned")))
+                        }
+//                        stateParameter != attempt.state -> {
+////                            callback(SignInWithAppleResult.Failure(IllegalArgumentException("state does not match")))
+//                        }
+                        else -> {
                             instance.socialLoginCallBack?.onSuccess(
                                 SocialTypeEnum.APPLE,
-                                it
+                                codeParameter
                             )
                         }
                     }
+
+                    true
                 }
-                return true
-            }
-            return false
-        }
-//
-//        @Nullable
-//        override fun shouldInterceptRequest(
-//            view: WebView,
-//            request: WebResourceRequest
-//        ): WebResourceResponse? {
-//            Log.i("TAG", "shouldInterceptRequest: reuest url is " + request.url.toString())
-//            try {
-//                val values = getUrlValues(request.url.toString())
-////                val email = values["email"]
-////                val idToken = values["idToken"]
-//                if (!values.isNullOrEmpty() && values["idToken"] != null) {
-//                    appleLoginDialog?.dismiss()
-//                    values["idToken"]?.let {
-//                        instance.socialLoginCallBack?.onSuccess(
-//                            SocialTypeEnum.APPLE,
-//                            it
-//                        )
-//                    }
-//                }
-//            } catch (e: UnsupportedEncodingException) {
-//                Log.e("Error", e.message ?: "")
-//            }
-//            return super.shouldInterceptRequest(view, request)
-//        }
-
-        override fun onPageFinished(view: WebView, url: String) {
-            super.onPageFinished(view, url)
-            val displayRectangle = Rect()
-            val window: Window? = instance.getWindow()
-            window?.decorView?.getWindowVisibleDisplayFrame(displayRectangle)
-            val layoutparms = view.layoutParams
-            layoutparms.height = (displayRectangle.height() * 0.9f).toInt()
-            view.layoutParams = layoutparms
-        }
-
-        @Throws(UnsupportedEncodingException::class)
-        fun getUrlValues(url: String): Map<String, String?> {
-            val i = url.indexOf("?")
-            val paramsMap: MutableMap<String, String?> = HashMap()
-            if (i > -1) {
-                val searchURL = url.substring(url.indexOf("?") + 1)
-                val params = searchURL.split("&").toTypedArray()
-                for (param in params) {
-                    val temp = param.split("=").toTypedArray()
-                    paramsMap[temp[0]] = URLDecoder.decode(temp[1], "UTF-8")
+                else -> {
+                    false
                 }
             }
-            return paramsMap
         }
     }
 }
