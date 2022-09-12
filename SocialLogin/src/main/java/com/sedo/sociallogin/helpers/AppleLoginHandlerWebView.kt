@@ -25,8 +25,10 @@ import java.util.*
 
 class AppleLoginHandlerWebView private constructor(
     mActivity: ComponentActivity? = null,
-    mFragment: Fragment? = null
-) : ISocialLogin(mActivity, mFragment) {
+    mFragment: Fragment? = null,
+    clientId: String?,
+    redirectUri: String?
+) : ISocialLogin(mActivity, mFragment, clientId, redirectUri) {
 
     companion object {
         const val AUTHURL = "https://appleid.apple.com/auth/authorize"
@@ -40,21 +42,25 @@ class AppleLoginHandlerWebView private constructor(
 
         fun getInstance(
             activity: ComponentActivity? = null,
-            fragment: Fragment? = null
+            fragment: Fragment? = null,
+            clientId: String?,
+            redirectUri: String?
         ): AppleLoginHandlerWebView =
             instance
                 ?: AppleLoginHandlerWebView(
-                    activity, fragment
+                    activity, fragment, clientId, redirectUri
                 ).also { instance = it }
 
         fun recreateInstance(
             activity: ComponentActivity? = null,
-            fragment: Fragment? = null
+            fragment: Fragment? = null,
+            clientId: String?,
+            redirectUri: String?
         ): AppleLoginHandlerWebView {
             instance = null
             return instance
                 ?: AppleLoginHandlerWebView(
-                    activity, fragment
+                    activity, fragment, clientId, redirectUri
                 ).also { instance = it }
         }
     }
@@ -83,8 +89,8 @@ class AppleLoginHandlerWebView private constructor(
 //        appleAuthURLFull?.let { openWebViewDialog(it) };
 
         val configuration = SignInWithAppleConfiguration(
-            clientId = clientId?:"",
-            redirectUri = redirectUri?:"",
+            clientId = clientId ?: "",
+            redirectUri = redirectUri ?: "",
             scope = "email"
         )
 
@@ -119,7 +125,11 @@ class AppleLoginHandlerWebView private constructor(
         try {
 
         } catch (e: Exception) {
-            Toast.makeText(getContext(),"signInResult:failed code=" + e.message,Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                getContext(),
+                "signInResult:failed code=" + e.message,
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
@@ -131,7 +141,9 @@ class AppleLoginHandlerWebView private constructor(
             webView.isVerticalFadingEdgeEnabled
             webView.isHorizontalScrollBarEnabled = false
             webView.isVerticalScrollBarEnabled = false
-            webView.webViewClient = AppleLoginWebView(getInstance(activity, fragment))
+            instance?.let {
+                webView.webViewClient = AppleLoginWebView(it)
+            }
             webView.settings.javaScriptEnabled = true
             webView.loadUrl(url)
             appleLoginDialog?.setContentView(webView)
@@ -147,7 +159,7 @@ class AppleLoginHandlerWebView private constructor(
 
                 }
                 appleLoginDialog?.dismiss()
-                val values = getUrlValues(url?:"")
+                val values = getUrlValues(url ?: "")
                 if (values.isNotEmpty() && values["idToken"] != null) {
                     appleLoginDialog?.dismiss()
                     values["idToken"]?.let {
@@ -159,6 +171,7 @@ class AppleLoginHandlerWebView private constructor(
                 }
             }
         }
+
         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
             Log.i("TAG", request.url.toString())
             try {
