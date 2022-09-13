@@ -7,11 +7,8 @@ import android.graphics.Bitmap
 import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
-import android.util.Log
 import android.view.Window
-import android.webkit.WebResourceRequest
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import android.webkit.*
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
@@ -22,6 +19,7 @@ import com.sedo.sociallogin.data.enums.SocialTypeEnum
 import java.io.UnsupportedEncodingException
 import java.net.URLDecoder
 import java.util.*
+
 
 class AppleLoginHandlerWebView private constructor(
     mActivity: ComponentActivity? = null,
@@ -76,7 +74,6 @@ class AppleLoginHandlerWebView private constructor(
     override fun setRegisterResult(resultLauncher: ActivityResultLauncher<Intent>) {
         this.resultLauncher = resultLauncher
     }
-
 
     //  Google Login issues
     override fun initMethod() {
@@ -140,6 +137,8 @@ class AppleLoginHandlerWebView private constructor(
             val webView = WebView(it)
             webView.settings.javaScriptCanOpenWindowsAutomatically = true
             webView.settings.javaScriptEnabled = true
+            webView.settings.domStorageEnabled = true
+            webView.addJavascriptInterface(FormDataInterface(), "FORMOUT")
             instance?.let {
                 webView.webViewClient = AppleLoginWebView(it)
             }
@@ -150,6 +149,78 @@ class AppleLoginHandlerWebView private constructor(
     }
 
     private class AppleLoginWebView(val instance: AppleLoginHandlerWebView) : WebViewClient() {
+        //        private val jsCode = "" + "function parseForm(form){" +
+//                "var values='';" +
+//                "for(var i=0 ; i< form.elements.length; i++){" +
+//                "   values+=form.elements[i].name+'='+form.elements[i].value+'&'" +
+//                "}" +
+//                "var url=form.action;" +
+//                "console.log('parse form fired');" +
+//                "window.FORMOUT.processFormData(url,values);" +
+//                "   }" +
+//                "for(var i=0 ; i< document.forms.length ; i++){" +
+//                "   parseForm(document.forms[i]);" +
+//                "};"
+        private val jsCode = "" + "function parseForm(form){" +
+                "    var formData = new FormData(form);" +
+//                "    // Convert formData object to URL-encoded string:" +
+                "    var payload = new URLSearchParams(formData);" +
+                "    const value = Object.fromEntries(formData.entries());"+
+                "    console.log('parse form = '+ formData.get('code'));" +
+                "    console.log('parse form = '+ formData.get('states'));" +
+                "}" +
+                "for(var i=0 ; i< document.forms.length ; i++){" +
+                "   parseForm(document.forms[i]);" +
+                "};"
+
+        //        private val jsCode = "" + "function parseForm(form){" +
+//                "console.log('parse form = '+ form);" +
+//                "console.log('parse form1 = '+ form.toString());" +
+//                "var values='';" +
+//                "for(var i=0 ; i< form.elements.length; i++){" +
+//                "console.log('parse'+ form.elements[i].);" +
+//                "   values+=form.elements[i].name+'='+form.elements[i].value+'&'" +
+//                "}" +
+//                "var url=form.action;" +
+//                "console.log('parse form fired');" +
+//                "window.FORMOUT.processFormData(url,values);" +
+//                "console.log(values);" +
+//                "   }" +
+//                "for(var i=0 ; i< document.forms.length ; i++){" +
+//                "   parseForm(document.forms[i]);" +
+//                "};"
+//
+//        private val jsCode = "" + "const constMock = window.fetch;" +
+//                "window.fetch = function() {" +
+////                "    if (arguments[1].method === 'post'){" +
+////                "        bodyResults(arguments[1].body)" +
+//                "        console.log(arguments[1].body);" +
+////                "    }" +
+////                "    return new Promise((resolve, reject) => {" +
+////                "        constantMock.apply(this, arguments)" +
+////                "            .then((response) => {" +
+////                "                if(response.url.indexOf(\"/me\") > -1 && response.type != \"cors\"){" +
+////                "                    console.log(response);" +
+////                "                    // do something for specificconditions" +
+////                "                }" +
+////                "                resolve(response);" +
+////                "            })" +
+////                "            .catch((error) => {" +
+////                "                reject(response);" +
+////                "            })" +
+////                "    });" +
+//                "}"
+
+        override
+
+        fun shouldInterceptRequest(
+            view: WebView?,
+            request: WebResourceRequest?
+        ): WebResourceResponse? {
+
+            return super.shouldInterceptRequest(view, request)
+        }
+
         // for API levels < 24
         override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
             return isUrlOverridden(view, Uri.parse(url))
@@ -202,14 +273,28 @@ class AppleLoginHandlerWebView private constructor(
             }
         }
 
+        override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+//            if (url.equals(instance.redirectUri)) {
+////                Log.d(DEBUG_TAG,"return url cancelling");
+//                view?.stopLoading();
+//                return
+//            }
+            super.onPageStarted(view, url, favicon)
+        }
+
         override fun onPageFinished(view: WebView, url: String) {
-            super.onPageFinished(view, url)
+
             val displayRectangle = Rect()
             val window: Window? = instance.getWindow()
             window?.decorView?.getWindowVisibleDisplayFrame(displayRectangle)
             val layoutparms = view.layoutParams
             layoutparms.height = (displayRectangle.height() * 0.9f).toInt()
             view.layoutParams = layoutparms
+//            if (url == instance.redirectUri) {
+//                return
+//            }
+            view.loadUrl("javascript:(function() { $jsCode})()");
+            super.onPageFinished(view, url)
         }
 
         @Throws(UnsupportedEncodingException::class)
@@ -225,6 +310,25 @@ class AppleLoginHandlerWebView private constructor(
                 }
             }
             return paramsMap
+        }
+    }
+
+    private class FormDataInterface {
+        @JavascriptInterface
+        fun processFormData(url: String, formData: String) {
+//            Log.d(DEBUG_TAG, "Url:$url form data $formData")
+            if (url == instance?.redirectUri) {
+                val map: HashMap<String, String> = HashMap()
+                val values = formData.split("&").toTypedArray()
+                for (pair in values) {
+                    val nameValue = pair.split("=").toTypedArray()
+                    if (nameValue.size == 2) {
+//                        Log.d(DEBUG_TAG, "Name:" + nameValue[0] + " value:" + nameValue[1])
+                        map[nameValue[0]] = nameValue[1]
+                    }
+                }
+                return
+            }
         }
     }
 }
