@@ -41,7 +41,7 @@ class AppleLoginHandlerWebView private constructor(
     override fun initMethod() {
         val state: String = UUID.randomUUID().toString()
         appleAuthURLFull =
-            "$AUTHURL?response_type=${RESPONSE_TYPE}&v=1.1.6&response_mode=${RESPONSE_MODE}"+"&client_id=$clientId"/*&scope=$SCOPE*/ + "&state=$state&redirect_uri=$redirectUri&usePopup=true"
+            "$AUTHURL?response_type=${RESPONSE_TYPE}&v=1.1.6&response_mode=${RESPONSE_MODE}" + "&client_id=$clientId"/*&scope=$SCOPE*/ + "&state=$state&redirect_uri=$redirectUri&usePopup=true"
     }
 
     override fun startMethod() {
@@ -98,7 +98,7 @@ class AppleLoginHandlerWebView private constructor(
             val layoutParams = view.layoutParams
             layoutParams.height = (displayRectangle.height() * 0.9f).toInt()
             view.layoutParams = layoutParams
-            if (instance.redirectUri?.let { url.startsWith(it) } == true) {
+            if (instance.redirectUri?.let { url.startsWith(it) } == true && !url.contains("error")) {
                 appleLoginDialog?.dismiss()
                 val response = getUrlValues(url)
                 response["id_token"]?.let { idToken ->
