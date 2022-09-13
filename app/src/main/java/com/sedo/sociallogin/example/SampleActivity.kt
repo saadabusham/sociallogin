@@ -57,7 +57,7 @@ class SampleActivity : AppCompatActivity() {
             }
         googleLoginHandler?.showError(true)
         googleLoginHandler?.setCallBack(object : SocialLoginCallBack {
-            override fun onSuccess(provider: SocialTypeEnum, token: String) {
+            override fun onSuccess(provider: SocialTypeEnum, token: String,code:String?) {
                 Toast.makeText(this@SampleActivity, token, Toast.LENGTH_SHORT).show()
             }
 
@@ -84,7 +84,7 @@ class SampleActivity : AppCompatActivity() {
         )
         appleLoginHandler?.showError(true)
         appleLoginHandler?.setCallBack(object : SocialLoginCallBack {
-            override fun onSuccess(provider: SocialTypeEnum, token: String) {
+            override fun onSuccess(provider: SocialTypeEnum, token: String,code:String?) {
                 Toast.makeText(this@SampleActivity, token, Toast.LENGTH_SHORT).show()
             }
         })
@@ -97,7 +97,7 @@ class SampleActivity : AppCompatActivity() {
         facebookLoginHandler = FacebookLoginHandler.getInstance(activity = this)
         facebookLoginHandler?.showError(true)
         facebookLoginHandler?.setCallBack(object : SocialLoginCallBack {
-            override fun onSuccess(provider: SocialTypeEnum, token: String) {
+            override fun onSuccess(provider: SocialTypeEnum, token: String,code:String?) {
                 Toast.makeText(this@SampleActivity, token, Toast.LENGTH_SHORT).show()
             }
         })
