@@ -21,9 +21,9 @@ object URLBuilder {
         scope?.let {
             urlBuilder.append("&scope=$scope")
         }
-        urlBuilder.append("&state = $state")
-        urlBuilder.append("&redirect_uri = $redirectUri")
-        urlBuilder.append("&usePopup = true")
+        urlBuilder.append("&state=$state")
+        urlBuilder.append("&redirect_uri=$redirectUri")
+        urlBuilder.append("&usePopup=true")
         return urlBuilder.toString()
     }
 }
