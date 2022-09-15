@@ -2,20 +2,19 @@ package com.sedo.sociallogin.helpers
 
 import android.annotation.SuppressLint
 import android.app.Dialog
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.view.Window
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.result.ActivityResultLauncher
 import androidx.fragment.app.Fragment
-import com.sedo.sociallogin.`interface`.SocialLoginCallBack
 import com.sedo.sociallogin.data.enums.SocialTypeEnum
-import java.io.UnsupportedEncodingException
-import java.net.URLDecoder
+import com.sedo.sociallogin.utils.Constants.AppleConstants.AUTHURL
+import com.sedo.sociallogin.utils.Constants.AppleConstants.RESPONSE_MODE
+import com.sedo.sociallogin.utils.Constants.AppleConstants.RESPONSE_TYPE
+import com.sedo.sociallogin.utils.URLBuilder
+import com.sedo.sociallogin.utils.UrlUtils.getUrlValues
 import java.util.*
 
 class AppleLoginHandlerWebView private constructor(
@@ -25,43 +24,20 @@ class AppleLoginHandlerWebView private constructor(
     redirectUri: String?
 ) : ISocialLogin(mActivity, mFragment, clientId, redirectUri) {
 
-    override fun showError(show: Boolean) {
-        this.showError = show
-    }
-
-    override fun setCallBack(socialLoginCallBack: SocialLoginCallBack) {
-        this.socialLoginCallBack = socialLoginCallBack
-    }
-
-    override fun setRegisterResult(resultLauncher: ActivityResultLauncher<Intent>) {
-        this.resultLauncher = resultLauncher
-    }
-
-    //  Google Login issues
     override fun initMethod() {
         val state: String = UUID.randomUUID().toString()
-        appleAuthURLFull =
-            "$AUTHURL?response_type=${RESPONSE_TYPE}&v=1.1.6&response_mode=${RESPONSE_MODE}" + "&client_id=$clientId"/*&scope=$SCOPE*/ + "&state=$state&redirect_uri=$redirectUri&usePopup=true"
+        appleAuthURLFull = URLBuilder.buildAppleAuthUrl(
+            authUrl = AUTHURL,
+            responseType = RESPONSE_TYPE,
+            responseMode = RESPONSE_MODE,
+            clientId = clientId,
+            state = state,
+            redirectUri = redirectUri
+        )
     }
 
     override fun startMethod() {
         appleAuthURLFull?.let { openWebViewDialog(it) };
-    }
-
-    override fun setResult(completedTask: Any) {
-        handleResult(completedTask)
-    }
-
-    override fun handleResult(completedTask: Any) {
-        try {
-
-        } catch (e: Exception) {
-            Toast.makeText(
-                getContext(),
-                "signInResult:failed code=" + e.message,
-                Toast.LENGTH_SHORT
-            ).show()
-        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -99,43 +75,30 @@ class AppleLoginHandlerWebView private constructor(
             layoutParams.height = (displayRectangle.height() * 0.9f).toInt()
             view.layoutParams = layoutParams
             if (instance.redirectUri?.let { url.startsWith(it) } == true && !url.contains("error")) {
-                appleLoginDialog?.dismiss()
-                val response = getUrlValues(url)
-                response["id_token"]?.let { idToken ->
-                    response["code"]?.let { code ->
-                        instance.socialLoginCallBack?.onSuccess(
-                            SocialTypeEnum.APPLE,
-                            idToken,
-                            code
-                        )
-                    }
-                }
+                instance.handleSuccess(url)
                 return
             }
             super.onPageFinished(view, url)
         }
 
-        @Throws(UnsupportedEncodingException::class)
-        fun getUrlValues(url: String): Map<String, String?> {
-            val i = url.indexOf("#")
-            val paramsMap: MutableMap<String, String?> = HashMap()
-            if (i > -1) {
-                val searchURL = url.substring(url.indexOf("#") + 1)
-                val params = searchURL.split("&").toTypedArray()
-                for (param in params) {
-                    val temp = param.split("=").toTypedArray()
-                    paramsMap[temp[0]] = URLDecoder.decode(temp[1], "UTF-8")
-                }
+    }
+
+    override fun handleSuccess(url: Any) {
+        url as String
+        appleLoginDialog?.dismiss()
+        val response = getUrlValues(url)
+        response["id_token"]?.let { idToken ->
+            response["code"]?.let { code ->
+                socialLoginCallBack?.onSuccess(
+                    SocialTypeEnum.APPLE,
+                    idToken,
+                    code
+                )
             }
-            return paramsMap
         }
     }
 
     companion object {
-        const val AUTHURL = "https://appleid.apple.com/auth/authorize"
-        const val SCOPE = "name%20email"
-        const val RESPONSE_TYPE = "code%20id_token"
-        const val RESPONSE_MODE = "fragment"
 
         private var appleAuthURLFull: String? = null
         private var appleLoginDialog: Dialog? = null

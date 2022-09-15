@@ -15,17 +15,6 @@ abstract class ISocialLogin(
     val clientId: String? = null,
     val redirectUri: String? = null
 ) {
-    abstract fun showError(show: Boolean)
-    abstract fun setCallBack(socialLoginCallBack: SocialLoginCallBack)
-    abstract fun setRegisterResult(resultLauncher: ActivityResultLauncher<Intent>)
-    abstract fun initMethod()
-    abstract fun startMethod()
-    open fun setResult(data: Any) {}
-    open fun handleResult(data: Any) {}
-
-    fun getContext() = activity ?: fragment?.requireContext()
-    fun getWindow() = activity?.window ?: fragment?.requireActivity()?.window
-
     protected var showError: Boolean? = false
     protected var socialLoginCallBack: SocialLoginCallBack? = null
     protected var resultLauncher: ActivityResultLauncher<Intent>? = null
@@ -42,4 +31,23 @@ abstract class ISocialLogin(
                     handleResult(task)
                 }
             }
+
+    abstract fun initMethod()
+    abstract fun startMethod()
+    abstract fun handleSuccess(data: Any)
+    open fun setResult(data: Any) {}
+    open fun handleResult(data: Any) {}
+    open fun showError(show: Boolean){
+        this.showError = show
+    }
+    open fun setCallBack(socialLoginCallBack: SocialLoginCallBack){
+        this.socialLoginCallBack = socialLoginCallBack
+    }
+    open fun setRegisterResult(resultLauncher: ActivityResultLauncher<Intent>){
+        this.resultLauncher = resultLauncher
+    }
+
+    fun getContext() = activity ?: fragment?.requireContext()
+    fun getWindow() = activity?.window ?: fragment?.requireActivity()?.window
+
 }

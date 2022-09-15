@@ -1,9 +1,7 @@
 package com.sedo.sociallogin.helpers
 
-import android.content.Intent
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.result.ActivityResultLauncher
 import androidx.fragment.app.Fragment
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -11,9 +9,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
-import com.sedo.sociallogin.`interface`.SocialLoginCallBack
 import com.sedo.sociallogin.data.enums.SocialTypeEnum
-
 
 class GoogleLoginHandler private constructor(
     mActivity: ComponentActivity? = null,
@@ -21,21 +17,8 @@ class GoogleLoginHandler private constructor(
     clientId: String?
 ) : ISocialLogin(mActivity, mFragment, clientId) {
 
-    override fun showError(show: Boolean) {
-        this.showError = show
-    }
-
-    override fun setCallBack(socialLoginCallBack: SocialLoginCallBack) {
-        this.socialLoginCallBack = socialLoginCallBack
-    }
-
-    override fun setRegisterResult(resultLauncher: ActivityResultLauncher<Intent>) {
-        this.resultLauncher = resultLauncher
-    }
-
     private var mGoogleSignInClient: GoogleSignInClient? = null
 
-    //  Google Login issues
     override fun initMethod() {
         getContext().let {
             val gso =
@@ -65,47 +48,55 @@ class GoogleLoginHandler private constructor(
     override fun startMethod() {
         try {
             val account = getContext()?.let { GoogleSignIn.getLastSignedInAccount(it) }
-            if (account == null) {
-                if (resultLauncher != null) {
-                    resultLauncher?.launch(mGoogleSignInClient?.signInIntent)
-                } else {
-                    defaultResultLauncher?.launch(mGoogleSignInClient?.signInIntent)
+            if (account != null) {
+                mGoogleSignInClient?.signOut()?.addOnSuccessListener {
+                    launchGoogleLogin()
                 }
             } else {
-                mGoogleSignInClient?.signOut()
+                launchGoogleLogin()
             }
-        }catch (e:Exception){
+        } catch (e: Exception) {
             getContext()?.let {
-                Toast.makeText(it,e.message,Toast.LENGTH_SHORT).show()
+                Toast.makeText(it, e.message, Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    override fun setResult(completedTask: Any) {
-        handleResult(completedTask)
+    private fun launchGoogleLogin() {
+        if (resultLauncher != null) {
+            resultLauncher?.launch(mGoogleSignInClient?.signInIntent)
+        } else {
+            defaultResultLauncher?.launch(mGoogleSignInClient?.signInIntent)
+        }
     }
 
-    override fun handleResult(completedTask: Any) {
+    override fun setResult(data: Any) {
+        handleResult(data)
+    }
+
+    override fun handleResult(data: Any) {
         try {
-            completedTask as Task<GoogleSignInAccount>
+            data as Task<GoogleSignInAccount>
             val account =
-                completedTask.getResult(ApiException::class.java)
+                data.getResult(ApiException::class.java)
             if (account?.serverAuthCode != null) {
-                account.account?.let {
-//                    getToken(account.serverAuthCode)
-                    account.idToken?.let { it1 ->
-                        socialLoginCallBack?.onSuccess(
-                            SocialTypeEnum.GOOGLE,
-                            it1
-                        )
-                    }
-                }
+                handleSuccess(account)
             }
         } catch (e: ApiException) {
             getContext()?.let {
                 Toast.makeText(it, "signInResult:failed code=" + e.statusCode, Toast.LENGTH_SHORT)
                     .show()
             }
+        }
+    }
+
+    override fun handleSuccess(account: Any) {
+        account as GoogleSignInAccount
+        account.idToken?.let { it1 ->
+            socialLoginCallBack?.onSuccess(
+                SocialTypeEnum.GOOGLE,
+                it1
+            )
         }
     }
 
@@ -133,8 +124,7 @@ class GoogleLoginHandler private constructor(
             return INSTANCE
                 ?: GoogleLoginHandler(
                     activity, fragment, clientId
-                )
-                    .also { INSTANCE = it }
+                ).also { INSTANCE = it }
         }
     }
 
