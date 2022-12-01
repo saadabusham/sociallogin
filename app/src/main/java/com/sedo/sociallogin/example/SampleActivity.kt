@@ -57,7 +57,7 @@ class SampleActivity : AppCompatActivity() {
             }
         googleLoginHandler?.showError(true)
         googleLoginHandler?.setCallBack(object : SocialLoginCallBack {
-            override fun onSuccess(provider: SocialTypeEnum, token: String,code:String?) {
+            override fun onSuccess(provider: SocialTypeEnum, token: String?, code: String?) {
                 Toast.makeText(this@SampleActivity, token, Toast.LENGTH_SHORT).show()
             }
 
@@ -79,13 +79,15 @@ class SampleActivity : AppCompatActivity() {
             return
         appleLoginHandler = AppleLoginHandlerWebView.getInstance(
             activity = this,
-            clientId = Constants.SocialLogin.APPLE_CLIENT_ID,
-            redirectUri = Constants.SocialLogin.APPLE_REDIRECT_URL
+            redirectUri = Constants.SocialLogin.APPLE_REDIRECT_URL,
+            fullUrl = Constants.SocialLogin.APPLE_FULL_URL
         )
         appleLoginHandler?.showError(true)
         appleLoginHandler?.setCallBack(object : SocialLoginCallBack {
-            override fun onSuccess(provider: SocialTypeEnum, token: String,code:String?) {
-                Toast.makeText(this@SampleActivity, token, Toast.LENGTH_SHORT).show()
+            override fun onSuccess(provider: SocialTypeEnum, token: String?, code: String?) {
+                runOnUiThread {
+                    Toast.makeText(this@SampleActivity, token?:code?:"", Toast.LENGTH_SHORT).show()
+                }
             }
         })
         appleLoginHandler?.initMethod()
@@ -97,7 +99,7 @@ class SampleActivity : AppCompatActivity() {
         facebookLoginHandler = FacebookLoginHandler.getInstance(activity = this)
         facebookLoginHandler?.showError(true)
         facebookLoginHandler?.setCallBack(object : SocialLoginCallBack {
-            override fun onSuccess(provider: SocialTypeEnum, token: String,code:String?) {
+            override fun onSuccess(provider: SocialTypeEnum, token: String?, code: String?) {
                 Toast.makeText(this@SampleActivity, token, Toast.LENGTH_SHORT).show()
             }
         })

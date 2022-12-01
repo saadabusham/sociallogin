@@ -12,13 +12,14 @@
         <entry key="..\:/TechZone Work/ContextMenu/app/src/main/res/layout/layout_custom_view1.xml" value="0.1921875" />
         <entry key="..\:/TechZone Work/ContextMenu/app/src/main/res/layout/layout_custom_view_sample.xml" value="0.1921875" />
         <entry key="..\:/TechZone Work/ContextMenu/app/src/main/res/layout/row_sample_item.xml" value="0.12635869565217392" />
+        <entry key="..\:/work/Apps/my own app/SocialLogin/SocialLogin/src/main/res/layout/apple_dialog.xml" value="0.35052083333333334" />
         <entry key="..\:/work/Apps/my own app/SocialLogin/app/src/main/res/drawable/ic_apple.xml" value="0.158" />
         <entry key="..\:/work/Apps/my own app/SocialLogin/app/src/main/res/drawable/ic_google_colored.xml" value="0.158" />
         <entry key="..\:/work/Apps/my own app/SocialLogin/app/src/main/res/layout/activity_sample.xml" value="0.23435897435897435" />
       </map>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">

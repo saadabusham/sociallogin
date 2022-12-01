@@ -13,7 +13,8 @@ abstract class ISocialLogin(
     val activity: ComponentActivity?,
     val fragment: Fragment?,
     val clientId: String? = null,
-    val redirectUri: String? = null
+    val redirectUri: String? = null,
+    val fullUrl: String? = null
 ) {
     protected var showError: Boolean? = false
     protected var socialLoginCallBack: SocialLoginCallBack? = null
