@@ -2,7 +2,6 @@ package com.sedo.sociallogin.helpers
 
 import android.annotation.SuppressLint
 import android.app.Dialog
-import android.app.Fragment
 import android.graphics.Bitmap
 import android.os.Message
 import android.view.ViewGroup
