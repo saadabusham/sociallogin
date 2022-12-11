@@ -129,7 +129,7 @@ class AppleLoginHandlerWebView private constructor(
     private class AppleLoginWebView(val instance: AppleLoginHandlerWebView) : WebViewClient() {
 
         override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-            if (instance.redirectUri?.let { url?.equals(it) } == true) {
+            if (instance.redirectUri?.let { url?.startsWith(it) } == true) {
                 view?.stopLoading();
                 return
             }
@@ -137,7 +137,7 @@ class AppleLoginHandlerWebView private constructor(
         }
 
         override fun onPageFinished(view: WebView, url: String) {
-            if (instance.redirectUri?.let { url == it } == true && !url.contains("error")) {
+            if (instance.redirectUri?.let { url.startsWith(it) } == true && !url.contains("error")) {
                 instance.handleSuccess(url)
                 return
             }
