@@ -137,7 +137,7 @@ class AppleLoginHandlerWebView private constructor(
         }
 
         override fun onPageFinished(view: WebView, url: String) {
-            if (instance.redirectUri?.let { url.startsWith(it) } == true && !url.contains("error")) {
+            if (instance.redirectUri?.let { url == it } == true && !url.contains("error")) {
                 instance.handleSuccess(url)
                 return
             }
