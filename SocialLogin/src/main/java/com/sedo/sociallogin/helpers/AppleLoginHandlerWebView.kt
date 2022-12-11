@@ -2,6 +2,7 @@ package com.sedo.sociallogin.helpers
 
 import android.annotation.SuppressLint
 import android.app.Dialog
+import android.app.Fragment
 import android.graphics.Bitmap
 import android.os.Message
 import android.view.ViewGroup
@@ -129,7 +130,7 @@ class AppleLoginHandlerWebView private constructor(
     private class AppleLoginWebView(val instance: AppleLoginHandlerWebView) : WebViewClient() {
 
         override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-            if (instance.redirectUri?.let { url?.startsWith(it) } == true) {
+            if (instance.redirectUri?.let { url?.equals(it) } == true) {
                 view?.stopLoading();
                 return
             }
