@@ -1,5 +1,7 @@
 package com.sedo.sociallogin.utils
 
+import android.net.Uri
+
 object URLBuilder {
 
     fun buildAppleAuthUrl(
@@ -25,5 +27,23 @@ object URLBuilder {
         urlBuilder.append("&redirect_uri=$redirectUri")
         urlBuilder.append("&usePopup=true")
         return urlBuilder.toString()
+    }
+
+    fun buildStravaAuthUrl(
+        authUrl: String?,
+        responseType: String?,
+        approvalType: String?,
+        clientId: String?,
+        redirectUri: String?,
+        scope: String? = null
+    ): Uri? {
+        return Uri.parse(authUrl)
+            .buildUpon()
+            .appendQueryParameter("client_id", clientId)
+            .appendQueryParameter("redirect_uri", redirectUri)
+            .appendQueryParameter("response_type", responseType)
+            .appendQueryParameter("approval_prompt", approvalType)
+            .appendQueryParameter("scope", scope)
+            .build()
     }
 }

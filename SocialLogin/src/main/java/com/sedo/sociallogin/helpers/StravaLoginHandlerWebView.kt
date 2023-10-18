@@ -14,15 +14,16 @@ import androidx.activity.ComponentActivity
 import androidx.fragment.app.Fragment
 import com.sedo.sociallogin.*
 import com.sedo.sociallogin.data.enums.SocialTypeEnum
-import com.sedo.sociallogin.utils.Constants.AppleConstants.AUTHURL
-import com.sedo.sociallogin.utils.Constants.AppleConstants.RESPONSE_MODE
-import com.sedo.sociallogin.utils.Constants.AppleConstants.RESPONSE_TYPE
+import com.sedo.sociallogin.utils.Constants.StravaConstants.APPROVAL_TYPE
+import com.sedo.sociallogin.utils.Constants.StravaConstants.AUTHURL
+import com.sedo.sociallogin.utils.Constants.StravaConstants.SCOPE
+import com.sedo.sociallogin.utils.Constants.StravaConstants.RESPONSE_TYPE
 import com.sedo.sociallogin.utils.URLBuilder
 import com.sedo.sociallogin.utils.UrlUtils.getUrlValues
 import java.util.*
 
 
-class AppleLoginHandlerWebView private constructor(
+class StravaLoginHandlerWebView private constructor(
     mActivity: ComponentActivity? = null,
     mFragment: Fragment? = null,
     clientId: String? = null,
@@ -31,31 +32,30 @@ class AppleLoginHandlerWebView private constructor(
 ) : ISocialLogin(mActivity, mFragment, clientId, redirectUri, fullUrl) {
     var webView: WebView? = null
     override fun initMethod() {
-        appleAuthURLFull = if (fullUrl.isNullOrEmpty()) {
-            val state: String = UUID.randomUUID().toString()
-            URLBuilder.buildAppleAuthUrl(
+        authURLFull = if (fullUrl.isNullOrEmpty()) {
+            URLBuilder.buildStravaAuthUrl(
                 authUrl = AUTHURL,
                 responseType = RESPONSE_TYPE,
-                responseMode = RESPONSE_MODE,
+                approvalType = APPROVAL_TYPE,
                 clientId = clientId,
-                state = state,
                 redirectUri = redirectUri,
-            )
+                scope = SCOPE
+            ).toString()
         } else {
             fullUrl
         }
     }
 
     override fun startMethod() {
-        appleAuthURLFull?.let { openWebViewDialog(it) };
+        authURLFull?.let { openWebViewDialog(it) };
     }
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun openWebViewDialog(url: String) {
         getContext()?.let {
-            appleLoginDialog = Dialog(it, R.style.FullScreenTransparentDialog)
-            appleLoginDialog?.setContentView(R.layout.webview_dialog)
-            webView = appleLoginDialog?.findViewById(R.id.webview)
+            loginDialog = Dialog(it, R.style.FullScreenTransparentDialog)
+            loginDialog?.setContentView(R.layout.webview_dialog)
+            webView = loginDialog?.findViewById(R.id.webview)
             webView?.settings?.javaScriptCanOpenWindowsAutomatically = true
             webView?.settings?.javaScriptEnabled = true
             webView?.settings?.domStorageEnabled = true
@@ -66,20 +66,17 @@ class AppleLoginHandlerWebView private constructor(
             webSettings?.javaScriptCanOpenWindowsAutomatically = true;
             webSettings?.allowFileAccess = true;
             webSettings?.allowContentAccess = true;
-            webSettings?.allowUniversalAccessFromFileURLs = true;
-            webSettings?.allowFileAccessFromFileURLs = true;
             instance?.let {
-                webView?.webViewClient = AppleLoginWebView(it)
-                webView?.webChromeClient = AppleLoginWebChromeClient(it)
+                webView?.webViewClient = StravaLoginWebView(it)
+                webView?.webChromeClient = StravaLoginWebChromeClient(it)
             }
             webView?.loadUrl(url)
-            appleLoginDialog?.show()
+            loginDialog?.show()
         }
     }
 
-    private class AppleLoginWebChromeClient(val instance: AppleLoginHandlerWebView) :
+    private class StravaLoginWebChromeClient(val instance: StravaLoginHandlerWebView) :
         WebChromeClient() {
-        // popup webview!
         @SuppressLint("SetJavaScriptEnabled")
         override fun onCreateWindow(
             view: WebView,
@@ -126,7 +123,7 @@ class AppleLoginHandlerWebView private constructor(
         }
     }
 
-    private class AppleLoginWebView(val instance: AppleLoginHandlerWebView) : WebViewClient() {
+    private class StravaLoginWebView(val instance: StravaLoginHandlerWebView) : WebViewClient() {
 
         override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
             if (instance.redirectUri?.let { url?.startsWith(it) } == true) {
@@ -148,13 +145,13 @@ class AppleLoginHandlerWebView private constructor(
 
     override fun handleSuccess(data: Any) {
         data as String
-        appleLoginDialog?.dismiss()
+        loginDialog?.dismiss()
         val response = getUrlValues(data)
         val code = response["code"]
         response["id_token"].let { idToken ->
             code.let { code ->
                 socialLoginCallBack?.onSuccess(
-                    SocialTypeEnum.APPLE,
+                    SocialTypeEnum.STRAVA,
                     idToken,
                     code
                 )
@@ -164,12 +161,12 @@ class AppleLoginHandlerWebView private constructor(
 
     companion object {
 
-        private var appleAuthURLFull: String? = null
-        private var appleLoginDialog: Dialog? = null
+        private var authURLFull: String? = null
+        private var loginDialog: Dialog? = null
 
         @SuppressLint("StaticFieldLeak")
         @Volatile
-        private var instance: AppleLoginHandlerWebView? = null
+        private var instance: StravaLoginHandlerWebView? = null
 
         fun getInstance(
             activity: ComponentActivity? = null,
@@ -177,9 +174,9 @@ class AppleLoginHandlerWebView private constructor(
             clientId: String? = null,
             redirectUri: String?,
             fullUrl: String? = null
-        ): AppleLoginHandlerWebView =
+        ): StravaLoginHandlerWebView =
             instance
-                ?: AppleLoginHandlerWebView(
+                ?: StravaLoginHandlerWebView(
                     activity, fragment, clientId, redirectUri, fullUrl
                 ).also { instance = it }
 
@@ -189,10 +186,10 @@ class AppleLoginHandlerWebView private constructor(
             clientId: String? = null,
             redirectUri: String?,
             fullUrl: String? = null
-        ): AppleLoginHandlerWebView {
+        ): StravaLoginHandlerWebView {
             instance = null
             return instance
-                ?: AppleLoginHandlerWebView(
+                ?: StravaLoginHandlerWebView(
                     activity, fragment, clientId, redirectUri, fullUrl
                 ).also { instance = it }
         }

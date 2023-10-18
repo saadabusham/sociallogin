@@ -9,15 +9,18 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.material.button.MaterialButton
 import com.sedo.sociallogin.`interface`.SocialLoginCallBack
 import com.sedo.sociallogin.data.enums.SocialTypeEnum
+import com.sedo.sociallogin.example.Constants.SocialLogin.STRAVA_CLIENT_ID
 import com.sedo.sociallogin.helpers.AppleLoginHandlerWebView
 import com.sedo.sociallogin.helpers.FacebookLoginHandler
 import com.sedo.sociallogin.helpers.GoogleLoginHandler
+import com.sedo.sociallogin.helpers.StravaLoginHandlerWebView
 
 class SampleActivity : AppCompatActivity() {
 
     var googleLoginHandler: GoogleLoginHandler? = null
     var appleLoginHandler: AppleLoginHandlerWebView? = null
     var facebookLoginHandler: FacebookLoginHandler? = null
+    var stravaLoginHandler: StravaLoginHandlerWebView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +39,9 @@ class SampleActivity : AppCompatActivity() {
         findViewById<MaterialButton>(R.id.btnFaceBook)?.setOnClickListener {
             facebookLoginHandler?.startMethod()
         }
+        findViewById<MaterialButton>(R.id.btnStrava)?.setOnClickListener {
+            stravaLoginHandler?.startMethod()
+        }
     }
 
     private fun initSocialLogin() {
@@ -43,6 +49,7 @@ class SampleActivity : AppCompatActivity() {
             initFacebook()
             initGoogle()
             initApple()
+            initStrava()
         } catch (e: Exception) {
             e
         }
@@ -104,6 +111,25 @@ class SampleActivity : AppCompatActivity() {
             }
         })
         facebookLoginHandler?.initMethod()
+    }
+
+    private fun initStrava() {
+        if (stravaLoginHandler != null)
+            return
+        stravaLoginHandler = StravaLoginHandlerWebView.getInstance(
+            activity = this,
+            redirectUri = Constants.SocialLogin.STRAVA_REDIRECT_URL,
+            clientId = STRAVA_CLIENT_ID
+        )
+        stravaLoginHandler?.showError(true)
+        stravaLoginHandler?.setCallBack(object : SocialLoginCallBack {
+            override fun onSuccess(provider: SocialTypeEnum, token: String?, code: String?) {
+                runOnUiThread {
+                    Toast.makeText(this@SampleActivity, token?:code?:"", Toast.LENGTH_SHORT).show()
+                }
+            }
+        })
+        stravaLoginHandler?.initMethod()
     }
 
 }
