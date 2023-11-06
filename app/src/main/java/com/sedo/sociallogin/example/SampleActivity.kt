@@ -59,7 +59,7 @@ class SampleActivity : AppCompatActivity() {
         if (googleLoginHandler != null)
             return
         googleLoginHandler =
-            GoogleLoginHandler.getInstance(activity = this).apply {
+            GoogleLoginHandler.getInstance(activity = this, clientId = "10773499689-k4noe7mrta26u4ramfdlopt41n7gounl.apps.googleusercontent.com").apply {
                 setRegisterResult(googleLoginResultLauncher)
             }
         googleLoginHandler?.showError(true)
