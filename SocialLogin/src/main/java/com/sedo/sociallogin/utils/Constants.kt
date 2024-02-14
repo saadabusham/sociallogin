@@ -13,7 +13,7 @@ object Constants {
         const val AUTHURL = "https://www.strava.com/oauth/authorize"
         const val RESPONSE_TYPE = "code"
         const val APPROVAL_TYPE = "auto"
-        const val SCOPE = "activity:write,read"
+        const val SCOPE = "activity:read_all"
     }
 
     object FacebookConstants {
