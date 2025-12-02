@@ -56,9 +56,9 @@ class AppleLoginHandler private constructor(
         }
     }
 
-    override fun handleSuccess(tokenResult: Any) {
-        tokenResult as GetTokenResult
-        tokenResult.token?.let { it1 ->
+    override fun handleSuccess(data: Any) {
+        data as GetTokenResult
+        data.token?.let { it1 ->
             instance?.socialLoginCallBack?.onSuccess(
                 SocialTypeEnum.APPLE,
                 it1

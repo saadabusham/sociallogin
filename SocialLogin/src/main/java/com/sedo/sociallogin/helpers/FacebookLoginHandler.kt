@@ -23,7 +23,7 @@ class FacebookLoginHandler private constructor(
 
     override fun initMethod() {
         this.facebookCallbackManager = CallbackManager.Factory.create()
-        this.facebookLoginButton = LoginButton(getContext())
+        this.facebookLoginButton = getContext()?.let { LoginButton(it) }
         this.facebookLoginButton?.loginBehavior = LoginBehavior.NATIVE_WITH_FALLBACK
         this.facebookLoginButton?.setReadPermissions(
             listOf(
@@ -45,30 +45,32 @@ class FacebookLoginHandler private constructor(
     }
 
     private fun registerFacebookCallback() {
-        facebookLoginButton?.registerCallback(
-            facebookCallbackManager,
-            object : FacebookCallback<LoginResult> {
-                override fun onSuccess(loginResult: LoginResult) {
-                    handleSuccess(loginResult)
-                }
-
-                override fun onCancel() {
-                    getContext()?.let {
-                        Toast.makeText(it, "Facebook login canceled", Toast.LENGTH_SHORT).show()
+        facebookCallbackManager?.let {
+            facebookLoginButton?.registerCallback(
+                it,
+                object : FacebookCallback<LoginResult> {
+                    override fun onSuccess(result: LoginResult) {
+                        handleSuccess(result)
                     }
-                }
 
-                override fun onError(error: FacebookException) {
-                    getContext()?.let {
-                        Toast.makeText(it, error.message, Toast.LENGTH_SHORT).show()
+                    override fun onCancel() {
+                        getContext()?.let {
+                            Toast.makeText(it, "Facebook login canceled", Toast.LENGTH_SHORT).show()
+                        }
                     }
-                }
-            })
+
+                    override fun onError(error: FacebookException) {
+                        getContext()?.let {
+                            Toast.makeText(it, error.message, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                })
+        }
     }
 
-    override fun handleSuccess(loginResult: Any) {
-        loginResult as LoginResult
-        val accessToken = loginResult.accessToken.token
+    override fun handleSuccess(data: Any) {
+        data as LoginResult
+        val accessToken = data.accessToken.token
         socialLoginCallBack?.onSuccess(
             SocialTypeEnum.FACEBOOK,
             accessToken

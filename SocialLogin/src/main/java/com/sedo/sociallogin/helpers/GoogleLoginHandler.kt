@@ -1,15 +1,19 @@
 package com.sedo.sociallogin.helpers
 
+import android.os.CancellationSignal
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.credentials.Credential
+import androidx.credentials.CredentialManager
+import androidx.credentials.CredentialManagerCallback
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.GetCredentialResponse
+import androidx.credentials.exceptions.GetCredentialException
 import androidx.fragment.app.Fragment
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.tasks.Task
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.sedo.sociallogin.data.enums.SocialTypeEnum
+
 
 class GoogleLoginHandler private constructor(
     mActivity: ComponentActivity? = null,
@@ -17,57 +21,53 @@ class GoogleLoginHandler private constructor(
     clientId: String?
 ) : ISocialLogin(mActivity, mFragment, clientId) {
 
-    private var mGoogleSignInClient: GoogleSignInClient? = null
+    private var credentialManager: CredentialManager? = null
 
     override fun initMethod() {
-        getContext().let {
-            val gso =
-                clientId
-                    .let {
-                        it?.let { it1 ->
-                            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                .requestServerAuthCode(
-                                    it1, true
-                                )
-                                .requestIdToken(it)
-                                .requestEmail()
-                                .build()
-                        }
-                    }
-            mGoogleSignInClient = it?.let { it1 ->
-                gso?.let { it2 ->
-                    GoogleSignIn.getClient(
-                        it1,
-                        it2
-                    )
-                }
-            }
-        }
+        credentialManager = getContext()?.let { CredentialManager.create(it) }
     }
 
     override fun startMethod() {
         try {
-            val account = getContext()?.let { GoogleSignIn.getLastSignedInAccount(it) }
-            if (account != null) {
-                mGoogleSignInClient?.signOut()?.addOnSuccessListener {
-                    launchGoogleLogin()
-                }
-            } else {
-                launchGoogleLogin()
-            }
+            launchGoogleLogin()
         } catch (e: Exception) {
-            getContext()?.let {
-                Toast.makeText(it, e.message, Toast.LENGTH_SHORT).show()
-            }
+            showToast(e.message?:"Error")
         }
     }
 
     private fun launchGoogleLogin() {
-        if (resultLauncher != null) {
-            resultLauncher?.launch(mGoogleSignInClient?.signInIntent)
-        } else {
-            defaultResultLauncher?.launch(mGoogleSignInClient?.signInIntent)
+        val context = getContext() ?: return
+        val id = clientId ?: return
+
+        val googleIdOption = GetGoogleIdOption.Builder()
+            .setServerClientId(id)
+            .setFilterByAuthorizedAccounts(false)
+            .setAutoSelectEnabled(true)
+            .build()
+
+        val request = GetCredentialRequest.Builder()
+            .addCredentialOption(googleIdOption)
+            .build()
+
+        val cancellationSignal = CancellationSignal()
+        cancellationSignal.setOnCancelListener {
+
         }
+
+        credentialManager?.getCredentialAsync(
+            context = context,
+            request = request,
+            cancellationSignal = cancellationSignal,
+            executor = { obj: Runnable? -> obj!!.run() },
+            callback = object : CredentialManagerCallback<GetCredentialResponse, GetCredentialException> {
+                override fun onResult(result: GetCredentialResponse) {
+                    setResult(result)
+                }
+                override fun onError(e: GetCredentialException) {
+                    showToast("Google login failed: ${e.message}")
+                }
+            }
+        )
     }
 
     override fun setResult(data: Any) {
@@ -76,27 +76,29 @@ class GoogleLoginHandler private constructor(
 
     override fun handleResult(data: Any) {
         try {
-            data as Task<GoogleSignInAccount>
-            val account =
-                data.getResult(ApiException::class.java)
-            if (account?.serverAuthCode != null) {
-                handleSuccess(account)
-            }
-        } catch (e: ApiException) {
-            getContext()?.let {
-                Toast.makeText(it, "signInResult:failed code=" + e.statusCode, Toast.LENGTH_SHORT)
-                    .show()
-            }
+            val res = data as GetCredentialResponse
+            val credential = res.credential
+            val googleIdTokenCredential: GoogleIdTokenCredential = GoogleIdTokenCredential.createFrom((credential.data))
+
+            handleSuccess(googleIdTokenCredential)
+
+        } catch (e: Exception) {
+            showToast("Google login failed: ${e.message}")
         }
     }
 
-    override fun handleSuccess(account: Any) {
-        account as GoogleSignInAccount
-        account.idToken?.let { it1 ->
-            socialLoginCallBack?.onSuccess(
-                SocialTypeEnum.GOOGLE,
-                it1
-            )
+    override fun handleSuccess(data: Any) {
+        data as GoogleIdTokenCredential
+        val token = data.idToken
+
+        socialLoginCallBack?.onSuccess(
+            SocialTypeEnum.GOOGLE, token
+        )
+    }
+
+    private fun showToast(msg: String) {
+        getContext()?.let {
+            Toast.makeText(it, msg, Toast.LENGTH_SHORT).show()
         }
     }
 
