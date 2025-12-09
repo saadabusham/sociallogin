@@ -19,6 +19,9 @@ import com.sedo.sociallogin.utils.Constants.AppleConstants.RESPONSE_MODE
 import com.sedo.sociallogin.utils.Constants.AppleConstants.RESPONSE_TYPE
 import com.sedo.sociallogin.utils.URLBuilder
 import com.sedo.sociallogin.utils.UrlUtils.getUrlValues
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.*
 
 
@@ -153,11 +156,13 @@ class AppleLoginHandlerWebView private constructor(
         val code = response["code"]
         response["id_token"].let { idToken ->
             code.let { code ->
-                socialLoginCallBack?.onSuccess(
-                    SocialTypeEnum.APPLE,
-                    idToken,
-                    code
-                )
+                CoroutineScope(Dispatchers.Main).launch {
+                    socialLoginCallBack?.onSuccess(
+                        SocialTypeEnum.APPLE,
+                        idToken,
+                        code
+                    )
+                }
             }
         }
     }

@@ -12,6 +12,9 @@ import com.facebook.login.widget.LoginButton
 import com.sedo.sociallogin.data.enums.SocialTypeEnum
 import com.sedo.sociallogin.utils.Constants.FacebookConstants.EMAIL_PERMISSION
 import com.sedo.sociallogin.utils.Constants.FacebookConstants.PUBLIC_PROFILE_PERMISSION
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class FacebookLoginHandler private constructor(
     mActivity: ComponentActivity,
@@ -41,6 +44,7 @@ class FacebookLoginHandler private constructor(
             getContext()?.let {
                 Toast.makeText(it, e.message, Toast.LENGTH_SHORT).show()
             }
+            showToast(msg = e.message ?: "Error")
         }
     }
 
@@ -54,15 +58,11 @@ class FacebookLoginHandler private constructor(
                     }
 
                     override fun onCancel() {
-                        getContext()?.let {
-                            Toast.makeText(it, "Facebook login canceled", Toast.LENGTH_SHORT).show()
-                        }
+                        showToast(msg = "Facebook login canceled")
                     }
 
                     override fun onError(error: FacebookException) {
-                        getContext()?.let {
-                            Toast.makeText(it, error.message, Toast.LENGTH_SHORT).show()
-                        }
+                        showToast(msg = error.message ?: "Error")
                     }
                 })
         }
@@ -71,10 +71,12 @@ class FacebookLoginHandler private constructor(
     override fun handleSuccess(data: Any) {
         data as LoginResult
         val accessToken = data.accessToken.token
-        socialLoginCallBack?.onSuccess(
-            SocialTypeEnum.FACEBOOK,
-            accessToken
-        )
+        CoroutineScope(Dispatchers.Main).launch {
+            socialLoginCallBack?.onSuccess(
+                SocialTypeEnum.FACEBOOK,
+                accessToken
+            )
+        }
     }
 
     companion object {

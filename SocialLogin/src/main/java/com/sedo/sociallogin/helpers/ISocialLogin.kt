@@ -2,12 +2,16 @@ package com.sedo.sociallogin.helpers
 
 import android.app.Activity
 import android.content.Intent
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.sedo.sociallogin.`interface`.SocialLoginCallBack
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 abstract class ISocialLogin(
     val activity: ComponentActivity?,
@@ -18,21 +22,6 @@ abstract class ISocialLogin(
 ) {
     protected var showError: Boolean? = false
     protected var socialLoginCallBack: SocialLoginCallBack? = null
-    protected var resultLauncher: ActivityResultLauncher<Intent>? = null
-    protected var defaultResultLauncher: ActivityResultLauncher<Intent>? =
-        fragment?.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-                handleResult(task)
-            }
-        }
-            ?: activity?.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                if (result.resultCode == Activity.RESULT_OK) {
-                    val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-                    handleResult(task)
-                }
-            }
-
     abstract fun initMethod()
     abstract fun startMethod()
     abstract fun handleSuccess(data: Any)
@@ -44,11 +33,16 @@ abstract class ISocialLogin(
     open fun setCallBack(socialLoginCallBack: SocialLoginCallBack){
         this.socialLoginCallBack = socialLoginCallBack
     }
-    open fun setRegisterResult(resultLauncher: ActivityResultLauncher<Intent>){
-        this.resultLauncher = resultLauncher
-    }
-
     fun getContext() = activity ?: fragment?.requireContext()
     fun getWindow() = activity?.window ?: fragment?.requireActivity()?.window
-
+    fun showToast(msg: String, callback: Boolean = true) {
+        getContext()?.let {
+            Toast.makeText(it, msg, Toast.LENGTH_SHORT).show()
+        }
+        if (callback) {
+            CoroutineScope(Dispatchers.Main).launch {
+                socialLoginCallBack?.onFailure(msg)
+            }
+        }
+    }
 }

@@ -3,7 +3,6 @@ package com.sedo.sociallogin.helpers
 import android.os.CancellationSignal
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.credentials.Credential
 import androidx.credentials.CredentialManager
 import androidx.credentials.CredentialManagerCallback
 import androidx.credentials.GetCredentialRequest
@@ -13,6 +12,9 @@ import androidx.fragment.app.Fragment
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.sedo.sociallogin.data.enums.SocialTypeEnum
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 class GoogleLoginHandler private constructor(
@@ -31,7 +33,7 @@ class GoogleLoginHandler private constructor(
         try {
             launchGoogleLogin()
         } catch (e: Exception) {
-            showToast(e.message?:"Error")
+            showToast(msg = e.message ?: "Error")
         }
     }
 
@@ -51,7 +53,7 @@ class GoogleLoginHandler private constructor(
 
         val cancellationSignal = CancellationSignal()
         cancellationSignal.setOnCancelListener {
-
+            showToast(msg = "Canceled")
         }
 
         credentialManager?.getCredentialAsync(
@@ -59,12 +61,14 @@ class GoogleLoginHandler private constructor(
             request = request,
             cancellationSignal = cancellationSignal,
             executor = { obj: Runnable? -> obj!!.run() },
-            callback = object : CredentialManagerCallback<GetCredentialResponse, GetCredentialException> {
+            callback = object :
+                CredentialManagerCallback<GetCredentialResponse, GetCredentialException> {
                 override fun onResult(result: GetCredentialResponse) {
                     setResult(result)
                 }
+
                 override fun onError(e: GetCredentialException) {
-                    showToast("Google login failed: ${e.message}")
+                    showToast(msg = "Google login failed: ${e.message}")
                 }
             }
         )
@@ -78,27 +82,23 @@ class GoogleLoginHandler private constructor(
         try {
             val res = data as GetCredentialResponse
             val credential = res.credential
-            val googleIdTokenCredential: GoogleIdTokenCredential = GoogleIdTokenCredential.createFrom((credential.data))
+            val googleIdTokenCredential: GoogleIdTokenCredential =
+                GoogleIdTokenCredential.createFrom((credential.data))
 
             handleSuccess(googleIdTokenCredential)
 
         } catch (e: Exception) {
-            showToast("Google login failed: ${e.message}")
+            showToast(msg = "Google login failed: ${e.message}")
         }
     }
 
     override fun handleSuccess(data: Any) {
         data as GoogleIdTokenCredential
         val token = data.idToken
-
-        socialLoginCallBack?.onSuccess(
-            SocialTypeEnum.GOOGLE, token
-        )
-    }
-
-    private fun showToast(msg: String) {
-        getContext()?.let {
-            Toast.makeText(it, msg, Toast.LENGTH_SHORT).show()
+        CoroutineScope(Dispatchers.Main).launch {
+            socialLoginCallBack?.onSuccess(
+                SocialTypeEnum.GOOGLE, token
+            )
         }
     }
 

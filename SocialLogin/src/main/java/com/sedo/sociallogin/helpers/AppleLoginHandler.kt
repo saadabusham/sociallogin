@@ -1,12 +1,14 @@
 package com.sedo.sociallogin.helpers
 
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GetTokenResult
 import com.google.firebase.auth.OAuthProvider
 import com.sedo.sociallogin.data.enums.SocialTypeEnum
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class AppleLoginHandler private constructor(
     mActivity: ComponentActivity,
@@ -31,9 +33,7 @@ class AppleLoginHandler private constructor(
             }
             launchAppleLogin()
         } catch (e: Exception) {
-            getContext()?.let {
-                Toast.makeText(it, e.message, Toast.LENGTH_SHORT).show()
-            }
+            showToast(msg = e.message ?: "Error")
         }
     }
 
@@ -46,11 +46,12 @@ class AppleLoginHandler private constructor(
                         user?.getIdToken(false)?.addOnSuccessListener {
                             handleSuccess(it)
                         }?.addOnFailureListener {
-
+                            showToast(it.message ?: "Error")
                         }
                     }?.addOnFailureListener { e ->
                         // logA("Apple Sign In Fail -> " + e.message)
                         e.printStackTrace()
+                        showToast(e.message ?: "Error")
                     }
             }
         }
@@ -59,10 +60,12 @@ class AppleLoginHandler private constructor(
     override fun handleSuccess(data: Any) {
         data as GetTokenResult
         data.token?.let { it1 ->
-            instance?.socialLoginCallBack?.onSuccess(
-                SocialTypeEnum.APPLE,
-                it1
-            )
+            CoroutineScope(Dispatchers.Main).launch {
+                instance?.socialLoginCallBack?.onSuccess(
+                    SocialTypeEnum.APPLE,
+                    it1
+                )
+            }
         }
     }
 
